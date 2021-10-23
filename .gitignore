@@ -1,3 +1,9 @@
+# Program files
+files/
+
+# VScode
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
