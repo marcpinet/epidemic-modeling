@@ -10,7 +10,7 @@
 
 🔬 Fully randomized simulation 🔬
 
-🧫 Inspired by [SIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) 🧫
+🧫 Inspired by [SEIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) 🧫
 
 ## Features
 
