@@ -1,5 +1,6 @@
 # Program files
 files/
+ui/qt-files/
 
 # VScode
 .vscode/

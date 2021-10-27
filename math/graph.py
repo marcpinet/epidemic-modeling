@@ -7,6 +7,7 @@ def create(file):
     healthy = []
     infected = []
     cured = []
+    incubating = []
     dead = []
     time = []
 
@@ -18,7 +19,8 @@ def create(file):
         healthy.append(int(line[0]))
         infected.append(int(line[1]))
         cured.append(int(line[2]))
-        dead.append(int(line[3]))
+        incubating.append(int(line[3]))
+        dead.append(int(line[4]))
         time.append(float(line[5].strip("\n")))
         
 
@@ -32,6 +34,9 @@ def create(file):
     cured_bspline = splrep(time, cured, s=5000)
     cured_smooth = splev(time, cured_bspline)
     
+    incubating_bspline = splrep(time, incubating, s=5000)
+    incubating_smooth = splev(time, incubating_bspline)
+    
     dead_bspline = splrep(time, dead, s=5000)
     dead_smooth = splev(time, dead_bspline)
 
@@ -42,6 +47,7 @@ def create(file):
     #plt.plot(time, dead, color="black")
     plt.plot(time, healthy_smooth, label="Healthy", color="green")
     plt.plot(time, infected_smooth, label="Infected", color="red")
+    plt.plot(time, incubating_smooth, label="Contaminated", color="purple")
     plt.plot(time, cured_smooth, label="Immune", color="blue")
     plt.plot(time, dead_smooth, label="Dead", color="black")
 

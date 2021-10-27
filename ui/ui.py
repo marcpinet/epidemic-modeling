@@ -113,14 +113,14 @@ class Ui_MainWindow(object):
         self.distance_val.setGeometry(QtCore.QRect(270, 250, 18, 13))
         self.distance_val.setObjectName("distance_val")
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        self.label_8.setGeometry(QtCore.QRect(60, 230, 131, 16))
+        self.label_8.setGeometry(QtCore.QRect(60, 280, 131, 16))
         self.label_8.setObjectName("label_8")
         self.initial_infected_val = QtWidgets.QLabel(self.centralwidget)
-        self.initial_infected_val.setGeometry(QtCore.QRect(30, 250, 21, 16))
+        self.initial_infected_val.setGeometry(QtCore.QRect(30, 300, 21, 16))
         self.initial_infected_val.setObjectName("initial_infected_val")
         self.initial_infected_population_slider = QtWidgets.QSlider(self.centralwidget)
         self.initial_infected_population_slider.setGeometry(
-            QtCore.QRect(60, 250, 160, 22)
+            QtCore.QRect(60, 300, 160, 22)
         )
         self.initial_infected_population_slider.setMaximum(
             self.number_of_dots_slider.value()
@@ -146,6 +146,19 @@ class Ui_MainWindow(object):
         self.masked_dots_val = QtWidgets.QLabel(self.centralwidget)
         self.masked_dots_val.setGeometry(QtCore.QRect(270, 150, 21, 16))
         self.masked_dots_val.setObjectName("masked_dots_val")
+        self.incubation_val = QtWidgets.QLabel(self.centralwidget)
+        self.incubation_val.setGeometry(QtCore.QRect(30, 250, 21, 16))
+        self.incubation_val.setObjectName("incubation_val")
+        self.label_10 = QtWidgets.QLabel(self.centralwidget)
+        self.label_10.setGeometry(QtCore.QRect(60, 230, 121, 16))
+        self.label_10.setObjectName("label_10")
+        self.incubation_slider = QtWidgets.QSlider(self.centralwidget)
+        self.incubation_slider.setGeometry(QtCore.QRect(60, 250, 160, 22))
+        self.incubation_slider.setMaximum(20)
+        self.incubation_slider.setSingleStep(0)
+        self.incubation_slider.setProperty("value", 2)
+        self.incubation_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.incubation_slider.setObjectName("incubation_slider")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -187,6 +200,9 @@ class Ui_MainWindow(object):
         self.distance_val.setText(
             _translate("MainWindow", str(self.minimal_distance_slider.value()))
         )
+        self.incubation_val.setText(_translate("MainWindow", str(self.incubation_slider.value())))
+        self.label_10.setText(_translate("MainWindow", "Incubation time (days)"))
+        self.incubation_slider.setWhatsThis(_translate("MainWindow", "Slider that allows the user to choose a value for the transmission rate"))
 
         # Everything that is below has been written by myself
         self.transmission_rate_slider.valueChanged.connect(self.transmission_val.setNum)
@@ -199,6 +215,7 @@ class Ui_MainWindow(object):
             self.initial_infected_val.setNum
         )
         self.masked_dots_slider.valueChanged.connect(self.masked_dots_val.setNum)
+        self.incubation_slider.valueChanged.connect(self.incubation_val.setNum)
         self.number_of_dots_slider.valueChanged.connect(self.fonction_couteau_suisse)
         self.minimal_distance_slider.valueChanged.connect(self.distance_val.setNum)
         self.pushButton.clicked.connect(self.go)
@@ -230,6 +247,7 @@ class Ui_MainWindow(object):
             f.write(self.distance_val.text() + "\n")
             f.write(self.initial_infected_val.text() + "\n")
             f.write(self.masked_dots_val.text() + "\n")
+            f.write(self.incubation_val.text() + "\n")
             f.write("." if self.dot_shaped_radio.isChecked() else "o" + "\n")
 
             sys.exit()
