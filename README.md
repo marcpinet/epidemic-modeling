@@ -27,6 +27,8 @@ https://user-images.githubusercontent.com/52708150/139343687-d3e2b1b8-5200-4956-
 
 https://user-images.githubusercontent.com/52708150/139345633-8f60f95f-530d-4114-b9d7-d4cdaf054a1a.mp4
 
+![image](https://user-images.githubusercontent.com/52708150/139345721-eca26e23-89ce-4471-bb81-7c2b767448b3.png)
+
 ### Support 👨‍💻
 
 Any problems with running the script and any questions please create a new issue [here](https://github.com/marcpinet/epidemic-modeling/issues/new?assignees=&labels=&template=bug_report.md&title=).
