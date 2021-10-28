@@ -17,7 +17,7 @@
 * Every parameters of the simulation is editable through an interactive GUI 🖥
 * Humans are moving randomly but logically and are represented by dots 👦
 * Humans can wear a mask and mask are 80% effective 🧢
-* Humans wearing a mask are represented by a cross and are harder to infect as well as being harder to infect ⛑️
+* Humans wearing a mask are represented by a "+" and do not easily infect as well as being harder to infect ⛑️
 * The simulation is fully randomized but keeps logic with given values 🎲
 * Choose the quality 🎞
 * At the end of the simulation, you can see the evolution of the population through time 📊
