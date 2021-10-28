@@ -251,12 +251,12 @@ def update_values() -> None:
     )
     number_of_infected_dots = len([dot for dot in dots if dot.is_infected])
     number_of_cured_dots = len([dot for dot in dots if dot.has_been_infected])
-    number_of_incubating_dots = len([dot for dot in dots if dot.is_infected and dot.infected_at + incubation_duration > time])
+    number_of_exposed_dots = len([dot for dot in dots if dot.is_infected and dot.infected_at + incubation_duration > time])
     number_of_dead_dots = len([dot for dot in dead_dots_list])
 
     plt.title(
         f"Healthy: {number_of_healthy_dots}"
-        + f"   |   Contaminated: {number_of_incubating_dots}"
+        + f"   |   Exposed: {number_of_exposed_dots}"
         + f"   |   Infected: {number_of_infected_dots}"
         + f"   |   Cured: {number_of_cured_dots}"
         + f"   |   Dead: {number_of_dead_dots}"
@@ -267,7 +267,7 @@ def update_values() -> None:
         number_of_healthy_dots,
         number_of_infected_dots,
         number_of_cured_dots,
-        number_of_incubating_dots,
+        number_of_exposed_dots,
         number_of_dead_dots,
         time,
     )
@@ -355,7 +355,7 @@ def write_logs(
     number_of_healthy_dots: int,
     number_of_infected_dots: int,
     number_of_cured_dots: int,
-    number_of_incubating_dots: int,
+    number_of_exposed_dots: int,
     number_of_dead_dots: int,
     time: float,
 ) -> None:
@@ -365,13 +365,13 @@ def write_logs(
         number_of_healthy_dots (int): Number of healthy dots
         number_of_infected_dots (int): Number of infected dots
         number_of_cured_dots (int): Number of cured dots
-        number_of_incubating_dots (int): Number of incubating dots
+        number_of_exposed_dots (int): Number of exposed dots
         number_of_dead_dots (int): Number of dead dots
         time (float): Time in days
     """
     with open("files\\logs.txt", "a") as f:
         f.write(
-            f"{number_of_healthy_dots}, {number_of_infected_dots}, {number_of_cured_dots}, {number_of_incubating_dots}, {number_of_dead_dots}, {time}\n"
+            f"{number_of_healthy_dots}, {number_of_infected_dots}, {number_of_cured_dots}, {number_of_exposed_dots}, {number_of_dead_dots}, {time}\n"
         )
 
 
@@ -384,14 +384,10 @@ def generate_not_taken_index(index_list: list) -> int:
     Returns:
         int: Index that has not been taken yet
     """
-    if len(index_list) != len(dots):
-        while True:
-            index = randint(0, len(dots) - 1)
-            if index not in index_list:
-                return index
-    raise ValueError(
-        "This error is not supposed to be raised. Something really strange might just happen..."
-    )
+    while True:
+        index = randint(0, len(dots) - 1)
+        if index not in index_list:
+            return index
 
 
 # -------------------- MAIN FUNCTION --------------------
@@ -422,7 +418,7 @@ def main() -> None:
         already_used_indexes.append(rdm)
 
     # Graph initialization
-    figure_dots = plt.figure(facecolor="white")
+    figure_dots = plt.figure(facecolor="white", figsize=(8, 6))
     dots_area = plt.axes(xlim=(0, HEIGHT_WIDTH), ylim=(0, HEIGHT_WIDTH))
 
     # Differentiating dots between each others
