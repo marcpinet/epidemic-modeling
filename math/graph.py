@@ -52,7 +52,7 @@ def create(file):
     plt.plot(time, dead_smooth, label="Dead", color="black")
 
     # Setting up graphic title and legend properties
-    plt.title("Epidemic modeling (see modeling.py)", loc="center")
+    plt.title("Epidemic modeling", loc="center")
     plt.legend(loc="right")
     plt.pause(0.001)
 
