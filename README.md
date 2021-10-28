@@ -42,10 +42,6 @@ I am a [Brave Verified Creator](https://i.imgur.com/fOUfdM5.png)!
 
 * Python 3.9+ (3.0+ might work)
 
-#### Before we get started
-
-You will need to have a web browser that supports magnet link and also a bittorrent client.
-
 Get a copy of the Project. Assuming you have git installed, open your Terminal and enter:
 
 ```bash
