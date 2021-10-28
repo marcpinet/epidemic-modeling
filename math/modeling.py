@@ -34,7 +34,7 @@ minimal_distance = int(
 )  # Minimal distance at initialization and for contamination
 initial_infected_population = int(parameters[6])
 masked_population = int(parameters[7])
-incubation_duration = int(parameters[8])
+exposed_duration = int(parameters[8])
 shape = parameters[9]  # tip: use '.' instead if you put a value < 3 in minimal_distance
 maskedShape = "P"
 
@@ -251,7 +251,7 @@ def update_values() -> None:
     )
     number_of_infected_dots = len([dot for dot in dots if dot.is_infected])
     number_of_cured_dots = len([dot for dot in dots if dot.has_been_infected])
-    number_of_exposed_dots = len([dot for dot in dots if dot.is_infected and dot.infected_at + incubation_duration > time])
+    number_of_exposed_dots = len([dot for dot in dots if dot.is_infected and dot.infected_at + exposed_duration > time])
     number_of_dead_dots = len([dot for dot in dead_dots_list])
 
     plt.title(
@@ -277,7 +277,7 @@ def update_values() -> None:
 
 def update_data() -> None:
     """Updates the data of the plot"""
-    global healthy_dots, infected_dots, cured_dots, time, dead_dots, dots_area, healthy_dots, infected_dots, cured_dots, dead_dots_masked, incubation_dots, incubation_dots_masked
+    global healthy_dots, infected_dots, cured_dots, time, dead_dots, dots_area, healthy_dots, infected_dots, cured_dots, dead_dots_masked, exposed_dots, exposed_dots_masked
 
     healthy_dots.set_data(
         [
@@ -302,9 +302,9 @@ def update_data() -> None:
         [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
     )
     
-    incubation_dots.set_data(
-        [dot.x for dot in dots if dot.is_infected and not dot.wears_mask and dot.infected_at + incubation_duration > time],
-        [dot.y for dot in dots if dot.is_infected and not dot.wears_mask and dot.infected_at + incubation_duration > time]
+    exposed_dots.set_data(
+        [dot.x for dot in dots if dot.is_infected and not dot.wears_mask and dot.infected_at + exposed_duration > time],
+        [dot.y for dot in dots if dot.is_infected and not dot.wears_mask and dot.infected_at + exposed_duration > time]
     )
 
 
@@ -338,9 +338,9 @@ def update_data() -> None:
         [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
     )
     
-    incubation_dots_masked.set_data(
-        [dot.x for dot in dots if dot.is_infected and dot.wears_mask and dot.infected_at + incubation_duration < time],
-        [dot.y for dot in dots if dot.is_infected and dot.wears_mask and dot.infected_at + incubation_duration < time]
+    exposed_dots_masked.set_data(
+        [dot.x for dot in dots if dot.is_infected and dot.wears_mask and dot.infected_at + exposed_duration > time],
+        [dot.y for dot in dots if dot.is_infected and dot.wears_mask and dot.infected_at + exposed_duration > time]
     )
 
     dead_dots_masked.set_data(
@@ -443,8 +443,8 @@ def main() -> None:
         f"b{shape}",
     )[0]
 
-    global incubation_dots
-    incubation_dots = dots_area.plot(
+    global exposed_dots
+    exposed_dots = dots_area.plot(
         [dot.x for dot in dots if dot.has_been_infected and not dot.wears_mask],
         [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
         f"m{shape}",
@@ -481,8 +481,8 @@ def main() -> None:
         f"b{maskedShape}",
     )[0]
     
-    global incubation_dots_masked
-    incubation_dots_masked = dots_area.plot(
+    global exposed_dots_masked
+    exposed_dots_masked = dots_area.plot(
         [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
         [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
         f"m{maskedShape}",
