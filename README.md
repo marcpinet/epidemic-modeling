@@ -17,21 +17,22 @@
 * Every parameters of the simulation is editable through an interactive GUI 🖥
 * Humans are moving randomly but logically and are represented by dots 👦
 * Humans can wear a mask and mask are 80% effective 🧢
+* Humans wearing a mask are represented by a cross and are harder to infect as well as being harder to infect ⛑️
 * The simulation is fully randomized but keeps logic with given values 🎲
 * Choose the quality 🎞
 * At the end of the simulation, you can see the evolution of the population through time 📊
 
 ## Demo
 
-https://user-images.githubusercontent.com/52708150/138672827-ad908a94-6edc-4c9c-893d-116a3fe694ef.mp4
+https://user-images.githubusercontent.com/52708150/139343687-d3e2b1b8-5200-4956-ae8f-42074f3e73e2.mp4
 
-https://user-images.githubusercontent.com/52708150/138672794-1a519c06-2efc-4fd3-a7ea-82dd937e3453.mp4
+https://user-images.githubusercontent.com/52708150/139343855-9fc9c2e6-f925-4f0a-aa5a-999a2fa79454.mp4
 
 ### Support 👨‍💻
 
-Any problems with running the script and any questions please create a new issue [here](https://github.com/marcpinet/batch-downloader-nyaa.si/issues/new?assignees=&labels=&template=bug_report.md&title=).
+Any problems with running the script and any questions please create a new issue [here](https://github.com/marcpinet/epidemic-modeling/issues/new?assignees=&labels=&template=bug_report.md&title=).
 
-You can also contribute to this project by requesting new features [here](https://github.com/marcpinet/batch-downloader-nyaa.si/issues/new?assignees=&labels=&template=feature_request.md&title=).
+You can also contribute to this project by requesting new features [here](https://github.com/marcpinet/epidemic-modeling/new?assignees=&labels=&template=feature_request.md&title=).
 
 I never ask for money for my open source projects. However, you can still tip me if you want.
 I am a [Brave Verified Creator](https://i.imgur.com/fOUfdM5.png)!
