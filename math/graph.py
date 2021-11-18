@@ -22,29 +22,28 @@ def create(file):
         exposed.append(int(line[3]))
         dead.append(int(line[4]))
         time.append(float(line[5].strip("\n")))
-        
 
     # Making the curve smoother before ploting
     healthy_bspline = splrep(time, healthy, s=5000)
     healthy_smooth = splev(time, healthy_bspline)
-    
+
     infected_bspline = splrep(time, infected, s=5000)
     infected_smooth = splev(time, infected_bspline)
 
     cured_bspline = splrep(time, cured, s=5000)
     cured_smooth = splev(time, cured_bspline)
-    
+
     exposed_bspline = splrep(time, exposed, s=5000)
     exposed_smooth = splev(time, exposed_bspline)
-    
+
     dead_bspline = splrep(time, dead, s=5000)
     dead_smooth = splev(time, dead_bspline)
 
     # Setting up plots
-    #plt.plot(time, healthy, color="green")
-    #plt.plot(time, infected, color="red")
-    #plt.plot(time, cured, color="blue")
-    #plt.plot(time, dead, color="black")
+    # plt.plot(time, healthy, color="green")
+    # plt.plot(time, infected, color="red")
+    # plt.plot(time, cured, color="blue")
+    # plt.plot(time, dead, color="black")
     plt.plot(time, healthy_smooth, label="Healthy", color="green")
     plt.plot(time, infected_smooth, label="Infected", color="red")
     plt.plot(time, exposed_smooth, label="Exposed", color="purple")
