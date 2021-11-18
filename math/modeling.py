@@ -251,7 +251,13 @@ def update_values() -> None:
     )
     number_of_infected_dots = len([dot for dot in dots if dot.is_infected])
     number_of_cured_dots = len([dot for dot in dots if dot.has_been_infected])
-    number_of_exposed_dots = len([dot for dot in dots if dot.is_infected and dot.infected_at + exposed_duration > time])
+    number_of_exposed_dots = len(
+        [
+            dot
+            for dot in dots
+            if dot.is_infected and dot.infected_at + exposed_duration > time
+        ]
+    )
     number_of_dead_dots = len([dot for dot in dead_dots_list])
 
     plt.title(
@@ -301,12 +307,23 @@ def update_data() -> None:
         [dot.x for dot in dots if dot.has_been_infected and not dot.wears_mask],
         [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
     )
-    
-    exposed_dots.set_data(
-        [dot.x for dot in dots if dot.is_infected and not dot.wears_mask and dot.infected_at + exposed_duration > time],
-        [dot.y for dot in dots if dot.is_infected and not dot.wears_mask and dot.infected_at + exposed_duration > time]
-    )
 
+    exposed_dots.set_data(
+        [
+            dot.x
+            for dot in dots
+            if dot.is_infected
+            and not dot.wears_mask
+            and dot.infected_at + exposed_duration > time
+        ],
+        [
+            dot.y
+            for dot in dots
+            if dot.is_infected
+            and not dot.wears_mask
+            and dot.infected_at + exposed_duration > time
+        ],
+    )
 
     dead_dots.set_data(
         [dot.x for dot in dead_dots_list if not dot.wears_mask],
@@ -337,10 +354,22 @@ def update_data() -> None:
         [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
         [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
     )
-    
+
     exposed_dots_masked.set_data(
-        [dot.x for dot in dots if dot.is_infected and dot.wears_mask and dot.infected_at + exposed_duration > time],
-        [dot.y for dot in dots if dot.is_infected and dot.wears_mask and dot.infected_at + exposed_duration > time]
+        [
+            dot.x
+            for dot in dots
+            if dot.is_infected
+            and dot.wears_mask
+            and dot.infected_at + exposed_duration > time
+        ],
+        [
+            dot.y
+            for dot in dots
+            if dot.is_infected
+            and dot.wears_mask
+            and dot.infected_at + exposed_duration > time
+        ],
     )
 
     dead_dots_masked.set_data(
@@ -480,7 +509,7 @@ def main() -> None:
         [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
         f"b{maskedShape}",
     )[0]
-    
+
     global exposed_dots_masked
     exposed_dots_masked = dots_area.plot(
         [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
