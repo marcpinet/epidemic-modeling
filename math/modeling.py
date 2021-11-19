@@ -1,14 +1,14 @@
 # -------------------- IMPORTS --------------------
 
 
-from random import randint, random
+from random import randint, random, uniform
 from matplotlib import pyplot as plt, animation as anim
 import math
 import sys
+import numpy as np
 
 
 # --------------------  GLOBAL PARAMETERS (DO NOT TOUCH) --------------------
-
 
 logs = []
 
@@ -43,6 +43,10 @@ transmission_rate_masked = (
     transmission_rate * 0.2
 )  # Chance of a masked dot to be infected
 
+simulation_speed = float(parameters[10])
+
+collision_enabled = bool(int(parameters[11]))
+
 
 # --------------------  GLOBAL VARIABLES --------------------
 
@@ -58,6 +62,18 @@ time_step = 0.1  # Time step for the simulation
 # -------------------- CLASSES & METHODS --------------------
 
 
+class Movement:
+    """Class that represents the movement of a dot"""
+    def __init__(self, chance_to_change_direction, angle) -> None:
+        """Constructor for the Movement class
+
+        Args:
+            chance_to_change_direction (float): chance of the dot to change direction
+            angle (float): angle of the dot
+        """
+        self.chance_to_change_direction = chance_to_change_direction
+        self.angle = angle
+
 class Dot:
     def __init__(self, x: int, y: int) -> None:
         """Constructor for the Dot class
@@ -66,6 +82,7 @@ class Dot:
             x (int): abscissa of the dot
             y (int): ordinate of the dot
         """
+        self.id = 0
         self.x = x
         self.y = y
         self.velx = (random() - 0.5) / 5
@@ -75,6 +92,7 @@ class Dot:
         self.has_been_infected = False
         self.cured_at = -1
         self.wears_mask = False
+        self.movement_type = Movement(uniform(0.85, 1), uniform(0, 50)) # Default Movements values, change this to adjust their movements
 
     @staticmethod
     def init_checker(x: float, y: float, already_used_coords: list) -> bool:
@@ -98,8 +116,8 @@ class Dot:
         """Gets the distance between a dot and coordinates objects
 
         Args:
-            x (float): abscissa of the first dot
-            y (float): ordinate of the first dot
+            x (float): abscissa of the distant dot
+            y (float): ordinate of the distant dot
 
         Returns:
             float: distance between the two dots
@@ -134,7 +152,7 @@ class Dot:
         near_infected_dots_list = [
             dot
             for dot in dots
-            if dot.is_infected and self.get_distance(dot.x, dot.y) < minimal_distance
+            if dot.is_infected and self.get_distance(dot.x, dot.y) < minimal_distance and self.id != dot.id
         ]
 
         for dot in near_infected_dots_list:
@@ -146,15 +164,56 @@ class Dot:
                 break
             break
 
-    def move(self) -> None:
-        """Moves the dot and makes sure they don't go out of the area or touch each other. They've 4% chance to change direction."""
-        if random() < 0.96:
-            self.x += self.velx
-            self.y += self.vely
+    def handle_collisions(self) -> None:
+        """Handles collisions between dots"""
+        # To avoid checking already checked dots, I preferred to use a for-range rather that a for-each loop
+        for i in range(self.id, len(dots)):
+            if self.get_distance(dots[i].x, dots[i].y) < 1.2 and self.id != dots[i].id:
+                # Whenever a dot makes contact with another dot, it will bounce back
+                self.velx *= -1
+                self.vely *= -1
+                dots[i].velx *= -1
+                dots[i].vely *= -1
+                break
 
-        else:
-            self.x = self.x + self.velx
-            self.y = self.y + self.vely
+    def move(self) -> None:
+        """Moves the dot and makes sure they don't go out of the area or touch each other. Their movements are determined by their Movement class attribute"""
+        if random() >= self.movement_type.chance_to_change_direction:
+            alpha = math.radians(np.random.normal(loc=0, scale=self.movement_type.angle))
+            theta = math.atan2(self.vely, self.velx)
+            norm = math.sqrt(self.velx ** 2 + self.vely ** 2)
+
+            self.velx = norm * math.cos(theta + alpha)
+            self.vely = norm * math.sin(theta + alpha)
+
+        self.x += self.velx * (simulation_speed / 10  + time_step)
+        self.y += self.vely * (simulation_speed / 10  + time_step)
+        
+        # Dots can collide each other
+        if collision_enabled:
+            self.handle_collisions()
+
+        if self.x >= BORDER_MAX:
+            self.x = BORDER_MAX
+            self.velx *= -1
+
+        if self.x <= BORDER_MIN:
+            self.x = BORDER_MIN
+            self.velx *= -1
+
+        if self.y >= BORDER_MAX:
+            self.y = BORDER_MAX
+            self.vely *= -1
+
+        if self.y <= BORDER_MIN:
+            self.y = BORDER_MIN
+            self.vely *= -1
+
+    def anarchic_move(self) -> None:
+        """Moves the dot and makes sure they don't go out of the area or touch each other. They've 4% chance to change direction."""
+        self.x += self.velx
+        self.y += self.vely
+        if random() > 0.96:
             # Change 2 to lower value to make the dots go faster
             self.velx = (random() - 0.5) / (2 / (time_step + 1))
             # Change 2 to lower value to make the dots go faster
@@ -428,6 +487,10 @@ def main() -> None:
 
     # Dots initialization
     dots = Dot.initalize_multiple_dots()
+
+    # Giving IDs to Dots
+    for dot in dots:
+        dot.id = dots.index(dot)
 
     already_used_indexes = []
     for _ in range(initial_infected_population):

@@ -20,12 +20,12 @@
 * Humans wearing a mask are represented by a "+" and do not easily infect as well as being harder to infect ⛑️
 * The simulation is fully randomized but keeps logic with given values 🎲
 * At the end of the simulation, you can see the evolution of the population through time 📊
+* You can adjust the speed simulation with the slider 🏃
+* You can choose whether dots collide between each other or not 🎯
 
 ## Demo
 
-https://user-images.githubusercontent.com/52708150/139343687-d3e2b1b8-5200-4956-ae8f-42074f3e73e2.mp4
-
-https://user-images.githubusercontent.com/52708150/139345633-8f60f95f-530d-4114-b9d7-d4cdaf054a1a.mp4
+https://user-images.githubusercontent.com/52708150/142642179-20fdc538-13ad-49e9-a1be-cb7616b6773a.mp4
 
 ![image](https://user-images.githubusercontent.com/52708150/139345721-eca26e23-89ce-4471-bb81-7c2b767448b3.png)
 

@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(489, 340)
+        MainWindow.resize(489, 422)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.label = QtWidgets.QLabel(self.centralwidget)
@@ -92,7 +92,7 @@ class Ui_MainWindow(object):
         self.label_7.setGeometry(QtCore.QRect(300, 30, 131, 16))
         self.label_7.setObjectName("label_7")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(390, 290, 75, 23))
+        self.pushButton.setGeometry(QtCore.QRect(390, 380, 75, 23))
         self.pushButton.setObjectName("pushButton")
         self.transmission_val = QtWidgets.QLabel(self.centralwidget)
         self.transmission_val.setGeometry(QtCore.QRect(30, 50, 21, 16))
@@ -118,6 +118,7 @@ class Ui_MainWindow(object):
         self.initial_infected_val = QtWidgets.QLabel(self.centralwidget)
         self.initial_infected_val.setGeometry(QtCore.QRect(30, 300, 21, 16))
         self.initial_infected_val.setObjectName("initial_infected_val")
+        self.initial_infected_val.setProperty("value", 0)
         self.initial_infected_population_slider = QtWidgets.QSlider(self.centralwidget)
         self.initial_infected_population_slider.setGeometry(
             QtCore.QRect(60, 300, 160, 22)
@@ -127,7 +128,7 @@ class Ui_MainWindow(object):
         )
         self.initial_infected_population_slider.setMinimum(1)
         self.initial_infected_population_slider.setSingleStep(1)
-        self.initial_infected_population_slider.setProperty("value", 200)
+        self.initial_infected_population_slider.setProperty("value", 0)
         self.initial_infected_population_slider.setOrientation(QtCore.Qt.Horizontal)
         self.initial_infected_population_slider.setObjectName(
             "initial_infected_population_slider"
@@ -137,7 +138,7 @@ class Ui_MainWindow(object):
         self.masked_dots_slider.setMinimum(0)
         self.masked_dots_slider.setMaximum(self.number_of_dots_slider.value())
         self.masked_dots_slider.setSingleStep(1)
-        self.masked_dots_slider.setProperty("value", 200)
+        self.masked_dots_slider.setProperty("value", 0)
         self.masked_dots_slider.setOrientation(QtCore.Qt.Horizontal)
         self.masked_dots_slider.setObjectName("masked_dots_slider")
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
@@ -146,6 +147,7 @@ class Ui_MainWindow(object):
         self.masked_dots_val = QtWidgets.QLabel(self.centralwidget)
         self.masked_dots_val.setGeometry(QtCore.QRect(270, 150, 21, 16))
         self.masked_dots_val.setObjectName("masked_dots_val")
+        self.masked_dots_val.setProperty("value", 20)
         self.incubation_val = QtWidgets.QLabel(self.centralwidget)
         self.incubation_val.setGeometry(QtCore.QRect(30, 250, 21, 16))
         self.incubation_val.setObjectName("incubation_val")
@@ -159,6 +161,24 @@ class Ui_MainWindow(object):
         self.incubation_slider.setProperty("value", 2)
         self.incubation_slider.setOrientation(QtCore.Qt.Horizontal)
         self.incubation_slider.setObjectName("incubation_slider")
+        self.label_11 = QtWidgets.QLabel(self.centralwidget)
+        self.label_11.setGeometry(QtCore.QRect(300, 280, 171, 16))
+        self.label_11.setObjectName("label_11")
+        self.simulation_speed_slider = QtWidgets.QSlider(self.centralwidget)
+        self.simulation_speed_slider.setGeometry(QtCore.QRect(300, 300, 160, 22))
+        self.simulation_speed_slider.setMinimum(0)
+        self.simulation_speed_slider.setMaximum(100)
+        self.simulation_speed_slider.setSingleStep(1)
+        self.simulation_speed_slider.setProperty("value", 20)
+        self.simulation_speed_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.simulation_speed_slider.setObjectName("simulation_speed_slider")
+        self.simulation_speed_val = QtWidgets.QLabel(self.centralwidget)
+        self.simulation_speed_val.setGeometry(QtCore.QRect(270, 300, 18, 13))
+        self.simulation_speed_val.setObjectName("simulation_speed_val")
+        self.simulation_speed_val.setProperty("value", 20)
+        self.collision = QtWidgets.QCheckBox(self.centralwidget)
+        self.collision.setGeometry(QtCore.QRect(150, 350, 201, 17))
+        self.collision.setObjectName("collision")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -200,10 +220,18 @@ class Ui_MainWindow(object):
         self.distance_val.setText(
             _translate("MainWindow", str(self.minimal_distance_slider.value()))
         )
+        self.simulation_speed_val.setText(
+            _translate("MainWindow", str(self.simulation_speed_slider.value()))
+        )
+        
         self.incubation_val.setText(_translate("MainWindow", str(self.incubation_slider.value())))
         self.label_10.setText(_translate("MainWindow", "Incubation time (days)"))
         self.incubation_slider.setWhatsThis(_translate("MainWindow", "Slider that allows the user to choose a value for the transmission rate"))
-
+        self.label_11.setText(_translate("MainWindow", "Simulation speed"))
+        self.simulation_speed_slider.setWhatsThis(_translate("MainWindow", "Slider that allows the user to choose a value for the transmission rate"))
+        self.simulation_speed_val.setText(_translate("MainWindow", "20"))
+        self.collision.setText(_translate("MainWindow", "Dots can collide between each other"))
+        
         # Everything that is below has been written by myself
         self.transmission_rate_slider.valueChanged.connect(self.transmission_val.setNum)
         self.mortality_rate_slider.valueChanged.connect(self.mortality_val.setNum)
@@ -218,6 +246,7 @@ class Ui_MainWindow(object):
         self.incubation_slider.valueChanged.connect(self.incubation_val.setNum)
         self.number_of_dots_slider.valueChanged.connect(self.fonction_couteau_suisse)
         self.minimal_distance_slider.valueChanged.connect(self.distance_val.setNum)
+        self.simulation_speed_slider.valueChanged.connect(self.simulation_speed_val.setNum)
         self.pushButton.clicked.connect(self.go)
         self.label_8.setText(_translate("MainWindow", "Initial infected population"))
         self.initial_infected_val.setText(
@@ -249,7 +278,8 @@ class Ui_MainWindow(object):
             f.write(self.masked_dots_val.text() + "\n")
             f.write(self.incubation_val.text() + "\n")
             f.write("." if self.dot_shaped_radio.isChecked() else "o" + "\n")
-
+            f.write(self.simulation_speed_val.text() + "\n")
+            f.write("1" if self.collision.isChecked() else "0" + "\n")
             sys.exit()
 
 
