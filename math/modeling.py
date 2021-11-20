@@ -56,7 +56,7 @@ BORDER_MIN = 1  # minimum distance from the border
 BORDER_MAX = HEIGHT_WIDTH - 1  # maximum distance from the border
 
 time = 0  # Time to initialize
-time_step = 0.1  # Time step for the simulation
+time_step = simulation_speed / 100  # Time step for the simulation
 
 
 # -------------------- CLASSES & METHODS --------------------
