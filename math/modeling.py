@@ -64,6 +64,7 @@ time_step = simulation_speed / 100  # Time step for the simulation
 
 class Movement:
     """Class that represents the movement of a dot"""
+
     def __init__(self, chance_to_change_direction, angle) -> None:
         """Constructor for the Movement class
 
@@ -73,6 +74,7 @@ class Movement:
         """
         self.chance_to_change_direction = chance_to_change_direction
         self.angle = angle
+
 
 class Dot:
     def __init__(self, x: int, y: int) -> None:
@@ -92,7 +94,9 @@ class Dot:
         self.has_been_infected = False
         self.cured_at = -1
         self.wears_mask = False
-        self.movement_type = Movement(uniform(0.85, 1), uniform(0, 50)) # Default Movements values, change this to adjust their movements
+        self.movement_type = Movement(
+            uniform(0.85, 1), uniform(0, 50)
+        )  # Default Movements values, change this to adjust their movements
 
     @staticmethod
     def init_checker(x: float, y: float, already_used_coords: list) -> bool:
@@ -152,7 +156,9 @@ class Dot:
         near_infected_dots_list = [
             dot
             for dot in dots
-            if dot.is_infected and self.get_distance(dot.x, dot.y) < minimal_distance and self.id != dot.id
+            if dot.is_infected
+            and self.get_distance(dot.x, dot.y) < minimal_distance
+            and self.id != dot.id
         ]
 
         for dot in near_infected_dots_list:
@@ -179,16 +185,20 @@ class Dot:
     def move(self) -> None:
         """Moves the dot and makes sure they don't go out of the area or touch each other. Their movements are determined by their Movement class attribute"""
         if random() >= self.movement_type.chance_to_change_direction:
-            alpha = math.radians(np.random.normal(loc=0, scale=self.movement_type.angle))
+            alpha = math.radians(
+                np.random.normal(loc=0, scale=self.movement_type.angle)
+            )
             theta = math.atan2(self.vely, self.velx)
             norm = math.sqrt(self.velx ** 2 + self.vely ** 2)
 
             self.velx = norm * math.cos(theta + alpha)
             self.vely = norm * math.sin(theta + alpha)
 
-        self.x += self.velx * (simulation_speed / 10  + time_step)
-        self.y += self.vely * (simulation_speed / 10  + time_step)
+        # Increment x and y by their velocities and simulation speed
+        self.x += self.velx * (simulation_speed / 10)
+        self.y += self.vely * (simulation_speed / 10)
         
+
         # Dots can collide each other
         if collision_enabled:
             self.handle_collisions()
