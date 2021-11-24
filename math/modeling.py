@@ -21,6 +21,7 @@ with open(file, "r") as f:
         line = line.replace("\n", "")
         parameters.append(line)
 
+values_list = []
 transmission_rate = int(parameters[0]) / 100  # Chance of a dot to be infected
 time_to_cure = int(parameters[2])  # Time to cure a dot
 virus_mortality = (
@@ -197,7 +198,6 @@ class Dot:
         # Increment x and y by their velocities and simulation speed
         self.x += self.velx * (simulation_speed / 10)
         self.y += self.vely * (simulation_speed / 10)
-        
 
         # Dots can collide each other
         if collision_enabled:
@@ -309,6 +309,7 @@ class Dot:
 def should_i_stop(number_of_healthy_dots, number_of_alive_dots) -> bool:
     """Checks if the simulation should stop"""
     if number_of_healthy_dots == number_of_alive_dots:
+        write_logs()
         sys.exit(0)
 
 
@@ -337,15 +338,15 @@ def update_values() -> None:
         + f"   |   Dead: {number_of_dead_dots}"
         + f"   |   Days: {round(time)}"
     )
-
-    write_logs(
+    
+    values_list.append([
         number_of_healthy_dots,
         number_of_infected_dots,
         number_of_cured_dots,
         number_of_exposed_dots,
         number_of_dead_dots,
         time,
-    )
+    ])
 
     should_i_stop(number_of_healthy_dots, number_of_alive_dots)
 
@@ -449,29 +450,13 @@ def update_data() -> None:
     time += time_step
 
 
-def write_logs(
-    number_of_healthy_dots: int,
-    number_of_infected_dots: int,
-    number_of_cured_dots: int,
-    number_of_exposed_dots: int,
-    number_of_dead_dots: int,
-    time: float,
-) -> None:
-    """Writes logs to a file
-
-    Args:
-        number_of_healthy_dots (int): Number of healthy dots
-        number_of_infected_dots (int): Number of infected dots
-        number_of_cured_dots (int): Number of cured dots
-        number_of_exposed_dots (int): Number of exposed dots
-        number_of_dead_dots (int): Number of dead dots
-        time (float): Time in days
-    """
+def write_logs():
+    """Write simulation logs to text file."""
     with open("files\\logs.txt", "a") as f:
-        f.write(
-            f"{number_of_healthy_dots}, {number_of_infected_dots}, {number_of_cured_dots}, {number_of_exposed_dots}, {number_of_dead_dots}, {time}\n"
-        )
-
+        for values in values_list:
+            f.write(
+                f"{values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]}\n"
+            )
 
 def generate_not_taken_index(index_list: list) -> int:
     """Generates an index that has not been taken yet
