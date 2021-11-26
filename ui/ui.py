@@ -192,7 +192,9 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "Transmission rate (%)"))
         self.label_2.setText(_translate("MainWindow", "Mortality rate (‰)"))
-        self.label_3.setText(_translate("MainWindow", "Time Before Being Immune (days)"))
+        self.label_3.setText(
+            _translate("MainWindow", "Time Before Being Immune (days)")
+        )
         self.label_4.setText(_translate("MainWindow", "Immunity duration (days)"))
         self.label_5.setText(_translate("MainWindow", "Number of dots"))
         self.label_6.setText(
@@ -223,15 +225,29 @@ class Ui_MainWindow(object):
         self.simulation_speed_val.setText(
             _translate("MainWindow", str(self.simulation_speed_slider.value()))
         )
-        
-        self.incubation_val.setText(_translate("MainWindow", str(self.incubation_slider.value())))
+
+        self.incubation_val.setText(
+            _translate("MainWindow", str(self.incubation_slider.value()))
+        )
         self.label_10.setText(_translate("MainWindow", "Incubation time (days)"))
-        self.incubation_slider.setWhatsThis(_translate("MainWindow", "Slider that allows the user to choose a value for the transmission rate"))
+        self.incubation_slider.setWhatsThis(
+            _translate(
+                "MainWindow",
+                "Slider that allows the user to choose a value for the transmission rate",
+            )
+        )
         self.label_11.setText(_translate("MainWindow", "Simulation speed"))
-        self.simulation_speed_slider.setWhatsThis(_translate("MainWindow", "Slider that allows the user to choose a value for the transmission rate"))
+        self.simulation_speed_slider.setWhatsThis(
+            _translate(
+                "MainWindow",
+                "Slider that allows the user to choose a value for the transmission rate",
+            )
+        )
         self.simulation_speed_val.setText(_translate("MainWindow", "10"))
-        self.collision.setText(_translate("MainWindow", "Dots can collide between each other"))
-        
+        self.collision.setText(
+            _translate("MainWindow", "Dots can collide between each other")
+        )
+
         # Everything that is below has been written by myself
         self.transmission_rate_slider.valueChanged.connect(self.transmission_val.setNum)
         self.mortality_rate_slider.valueChanged.connect(self.mortality_val.setNum)
@@ -246,7 +262,9 @@ class Ui_MainWindow(object):
         self.incubation_slider.valueChanged.connect(self.incubation_val.setNum)
         self.number_of_dots_slider.valueChanged.connect(self.fonction_couteau_suisse)
         self.minimal_distance_slider.valueChanged.connect(self.distance_val.setNum)
-        self.simulation_speed_slider.valueChanged.connect(self.simulation_speed_val.setNum)
+        self.simulation_speed_slider.valueChanged.connect(
+            self.simulation_speed_val.setNum
+        )
         self.pushButton.clicked.connect(self.go)
         self.label_8.setText(_translate("MainWindow", "Initial infected population"))
         self.initial_infected_val.setText(

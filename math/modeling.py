@@ -3,12 +3,13 @@
 
 from random import randint, random, uniform
 from matplotlib import pyplot as plt, animation as anim
+from matplotlib.widgets import Button
 import math
 import sys
 import numpy as np
 
 
-# --------------------  GLOBAL PARAMETERS (DO NOT TOUCH) --------------------
+# --------------------  GLOBAL PARAMETERS (RETRIVED FROM FILE) --------------------
 
 logs = []
 
@@ -195,7 +196,7 @@ class Dot:
             self.velx = norm * math.cos(theta + alpha)
             self.vely = norm * math.sin(theta + alpha)
 
-        # Increment x and y by their velocities and simulation speed
+        # Increment x and y by their velocities and time_step
         self.x += self.velx * (simulation_speed / 10)
         self.y += self.vely * (simulation_speed / 10)
 
@@ -225,9 +226,9 @@ class Dot:
         self.y += self.vely
         if random() > 0.96:
             # Change 2 to lower value to make the dots go faster
-            self.velx = (random() - 0.5) / (2 / (time_step + 1))
+            self.velx = (random() - 0.5) / (1 / (time_step + 1))
             # Change 2 to lower value to make the dots go faster
-            self.vely = (random() - 0.5) / (2 / (time_step + 1))
+            self.vely = (random() - 0.5) / (1 / (time_step + 1))
 
         if self.x >= BORDER_MAX:
             self.x = BORDER_MAX
@@ -308,7 +309,9 @@ class Dot:
 
 def should_i_stop(number_of_healthy_dots, number_of_alive_dots) -> bool:
     """Checks if the simulation should stop"""
-    if number_of_healthy_dots == number_of_alive_dots:
+    if (number_of_healthy_dots == number_of_alive_dots) or (
+        number_of_alive_dots == -1 and number_of_healthy_dots == -1
+    ):
         write_logs()
         sys.exit(0)
 
@@ -330,7 +333,7 @@ def update_values() -> None:
     )
     number_of_dead_dots = len([dot for dot in dead_dots_list])
 
-    plt.title(
+    dots_area.set_title(
         f"Healthy: {number_of_healthy_dots}"
         + f"   |   Exposed: {number_of_exposed_dots}"
         + f"   |   Infected: {number_of_infected_dots}"
@@ -338,15 +341,17 @@ def update_values() -> None:
         + f"   |   Dead: {number_of_dead_dots}"
         + f"   |   Days: {round(time)}"
     )
-    
-    values_list.append([
-        number_of_healthy_dots,
-        number_of_infected_dots,
-        number_of_cured_dots,
-        number_of_exposed_dots,
-        number_of_dead_dots,
-        time,
-    ])
+
+    values_list.append(
+        [
+            number_of_healthy_dots,
+            number_of_infected_dots,
+            number_of_cured_dots,
+            number_of_exposed_dots,
+            number_of_dead_dots,
+            time,
+        ]
+    )
 
     should_i_stop(number_of_healthy_dots, number_of_alive_dots)
 
@@ -457,6 +462,7 @@ def write_logs():
             f.write(
                 f"{values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]}\n"
             )
+
 
 def generate_not_taken_index(index_list: list) -> int:
     """Generates an index that has not been taken yet
@@ -587,6 +593,15 @@ def main() -> None:
         figure_dots, lambda z: Dot.move_all(dots), frames=60, interval=0
     )
     dots_area.axis("off")
+
+    # Button to stop the simulation
+    axstop = figure_dots.add_axes([0.88, 0.02, 0.1, 0.075])
+    b_stop = Button(axstop, "Stop")
+
+    # Positioning the button at bottom right corner
+    b_stop.on_clicked(lambda _: should_i_stop(-1, -1))
+
+    # Showing the plot
     plt.show()
 
 
