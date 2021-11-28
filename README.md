@@ -8,7 +8,7 @@
 
 👁️ Visual and graphical interpretation of results from the simulation 👁️
 
-🔬 Fully randomized simulation 🔬
+🔬 Randomized simulation 🔬
 
 🧫 Inspired by [SEIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) 🧫
 
@@ -18,16 +18,25 @@
 * Humans are moving randomly but logically and are represented by dots 👦
 * Humans can wear a mask and mask are 80% effective 🧢
 * Humans wearing a mask are represented by a "+" and do not easily infect as well as being harder to infect ⛑️
-* The simulation is fully randomized but keeps logic with given values 🎲
-* At the end of the simulation, you can see the evolution of the population through time 📊
+* The simulation is almost fully randomized but keeps logic with given values 🎲
 * You can adjust the speed simulation with the slider 🏃
-* You can choose whether dots collide between each other or not 🎯
+* You can tweak some specific parameters of the simulation 🧰
+* At the end of the simulation, you can see the evolution of the population through time 📊
+* ... and many more! 🎯
 
 ## Demo
 
-https://user-images.githubusercontent.com/52708150/142642179-20fdc538-13ad-49e9-a1be-cb7616b6773a.mp4
+### One wave of the epidemic was simulated
 
-![image](https://user-images.githubusercontent.com/52708150/139345721-eca26e23-89ce-4471-bb81-7c2b767448b3.png)
+https://user-images.githubusercontent.com/52708150/143726042-e39aaaaf-ed5b-44b6-a826-ed4cf5c1d47c.mp4
+
+![image](https://user-images.githubusercontent.com/52708150/143726053-2daabb4e-ed1d-4042-9872-be6436bf0e29.png)
+
+### Two waves of the epidemic were simulated
+
+https://user-images.githubusercontent.com/52708150/143726078-8110e824-c406-4249-b9c0-148e99fd7b30.mp4
+
+![image2](https://user-images.githubusercontent.com/52708150/143726094-a7bc48cd-656d-44ad-befe-ae04165fb473.png)
 
 ### Support 👨‍💻
 
@@ -72,5 +81,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## Contributions
 
-Special thanks to [loicpantano](https://github.com/loicpantano) and [marcusaasjensen](https://github.com/marcusaasjensen) for their contributions.
-We were in the same team for this project and we worked together on different programs (see [marcus' simulation](https://github.com/marcusaasjensen/covid-simulation))
+Special thanks to [loicpantano](https://github.com/loicpantano) for some ideas and [marcusaasjensen](https://github.com/marcusaasjensen) for its participation in the project (he made a its own simulation in C# of an airport with graphs, see [marcus' simulation](https://github.com/marcusaasjensen/covid-simulation)).
+
+We were in the same team for this project and we worked together on different programs.
