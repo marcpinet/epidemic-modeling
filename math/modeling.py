@@ -18,11 +18,16 @@ parameters = []
 
 with open(file, "r") as f:
     lines = f.readlines()
+
+    # In case the config file is empty
+    if not lines:
+        sys.exit(1)
+
     for line in lines:
         line = line.replace("\n", "")
         parameters.append(line)
 
-values_list = []
+sim_values_over_time = []
 transmission_rate = int(parameters[0]) / 100  # Chance of a dot to be infected
 time_to_cure = int(parameters[2])  # Time to cure a dot
 virus_mortality = (
@@ -43,11 +48,15 @@ maskedShape = "P"
 # For masked population
 transmission_rate_masked = (
     transmission_rate * 0.2
-)  # Chance of a masked dot to be infected
+)  # Chance of a masked dot to be infected and to infect a healthy dot
 
 simulation_speed = float(parameters[10])
 
 collision_enabled = bool(int(parameters[11]))
+dots_same_speed = bool(int(parameters[12]))
+infected_wear_mask = bool(int(parameters[13]))
+infected_slowdown = bool(int(parameters[14]))
+people_travel_slower = bool(int(parameters[15]))
 
 
 # --------------------  GLOBAL VARIABLES --------------------
@@ -67,15 +76,23 @@ time_step = simulation_speed / 100  # Time step for the simulation
 class Movement:
     """Class that represents the movement of a dot"""
 
-    def __init__(self, chance_to_change_direction, angle) -> None:
-        """Constructor for the Movement class
+    def __init__(self) -> None:
+        """Constructor for the Movement class"""
+        self.chance_to_change_direction = uniform(0.85, 1)
+        self.angle = uniform(0, 50)
+        
+        reduction_factor = 100 if not people_travel_slower else simulation_speed * 20
+        
+        self.initial_speed = (
+            np.random.normal(loc=simulation_speed / reduction_factor, scale=100 / reduction_factor)
+            if not dots_same_speed
+            else simulation_speed / reduction_factor
+        )  # Making speedy dots rarer
+        self.speed = self.initial_speed
 
-        Args:
-            chance_to_change_direction (float): chance of the dot to change direction
-            angle (float): angle of the dot
-        """
-        self.chance_to_change_direction = chance_to_change_direction
-        self.angle = angle
+    def speed_back_to_normal(self):
+        """Method that resets the speed back to its original value"""
+        self.speed = self.initial_speed
 
 
 class Dot:
@@ -96,9 +113,9 @@ class Dot:
         self.has_been_infected = False
         self.cured_at = -1
         self.wears_mask = False
-        self.movement_type = Movement(
-            uniform(0.85, 1), uniform(0, 50)
-        )  # Default Movements values, change this to adjust their movements
+        self.movement = (
+            Movement()
+        )  # Default Movements values (change in Movement class to adjust their movements)
 
     @staticmethod
     def init_checker(x: float, y: float, already_used_coords: list) -> bool:
@@ -169,6 +186,13 @@ class Dot:
             ) or not dot.wears_mask:
                 self.is_infected = True
                 self.infected_at = time
+
+                if infected_slowdown:
+                    self.movement.speed *= 0.5  # Reduce speed by 50%
+
+                if infected_wear_mask:
+                    self.wears_mask = True
+
                 break
             break
 
@@ -185,11 +209,11 @@ class Dot:
                 break
 
     def move(self) -> None:
-        """Moves the dot and makes sure they don't go out of the area or touch each other. Their movements are determined by their Movement class attribute"""
-        if random() >= self.movement_type.chance_to_change_direction:
-            alpha = math.radians(
-                np.random.normal(loc=0, scale=self.movement_type.angle)
-            )
+        """Moves the dot and makes sure they don't go out of the area or touch each other.
+        Their movements are determined by their Movement class attribute and a normal distribution
+        """
+        if random() >= self.movement.chance_to_change_direction:
+            alpha = math.radians(np.random.normal(loc=0, scale=self.movement.angle))
             theta = math.atan2(self.vely, self.velx)
             norm = math.sqrt(self.velx ** 2 + self.vely ** 2)
 
@@ -197,8 +221,8 @@ class Dot:
             self.vely = norm * math.sin(theta + alpha)
 
         # Increment x and y by their velocities and time_step
-        self.x += self.velx * (simulation_speed / 10)
-        self.y += self.vely * (simulation_speed / 10)
+        self.x += self.velx * ((simulation_speed * (1 + self.movement.speed)) / 10)
+        self.y += self.vely * ((simulation_speed * (1 + self.movement.speed)) / 10)
 
         # Dots can collide each other
         if collision_enabled:
@@ -257,6 +281,10 @@ class Dot:
         self.is_infected = False
         self.has_been_infected = True
         self.cured_at = time
+        self.movement.speed_back_to_normal()
+
+        if infected_wear_mask:
+            self.wears_mask = False
 
     def become_healthy(self) -> None:
         """Makes the dot healthy"""
@@ -342,7 +370,7 @@ def update_values() -> None:
         + f"   |   Days: {round(time)}"
     )
 
-    values_list.append(
+    sim_values_over_time.append(
         [
             number_of_healthy_dots,
             number_of_infected_dots,
@@ -374,8 +402,16 @@ def update_data() -> None:
     )
 
     infected_dots.set_data(
-        [dot.x for dot in dots if dot.is_infected and not dot.wears_mask],
-        [dot.y for dot in dots if dot.is_infected and not dot.wears_mask],
+        [
+            dot.x
+            for dot in dots
+            if dot.is_infected and not dot.wears_mask and not infected_wear_mask
+        ],
+        [
+            dot.y
+            for dot in dots
+            if dot.is_infected and not dot.wears_mask and not infected_wear_mask
+        ],
     )
 
     cured_dots.set_data(
@@ -421,8 +457,16 @@ def update_data() -> None:
     )
 
     infected_dots_masked.set_data(
-        [dot.x for dot in dots if dot.is_infected and dot.wears_mask],
-        [dot.y for dot in dots if dot.is_infected and dot.wears_mask],
+        [
+            dot.x
+            for dot in dots
+            if dot.is_infected and (dot.wears_mask or infected_wear_mask)
+        ],
+        [
+            dot.y
+            for dot in dots
+            if dot.is_infected and (dot.wears_mask or infected_wear_mask)
+        ],
     )
 
     cured_dots_masked.set_data(
@@ -458,7 +502,7 @@ def update_data() -> None:
 def write_logs():
     """Write simulation logs to text file."""
     with open("files\\logs.txt", "a") as f:
-        for values in values_list:
+        for values in sim_values_over_time:
             f.write(
                 f"{values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]}\n"
             )
@@ -500,6 +544,10 @@ def main() -> None:
 
         dots[rdm].is_infected = True
         dots[rdm].infected_at = time
+
+        if infected_wear_mask:
+            dots[rdm].wears_mask = True
+
         already_used_indexes.append(rdm)
 
     already_used_indexes = []
