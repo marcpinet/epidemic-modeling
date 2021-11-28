@@ -1,6 +1,7 @@
 # Program files
 files/
 ui/qt-files/
+todo.todo
 
 # VScode
 .vscode/
