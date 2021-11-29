@@ -30,13 +30,9 @@
 
 https://user-images.githubusercontent.com/52708150/143726042-e39aaaaf-ed5b-44b6-a826-ed4cf5c1d47c.mp4
 
-![image](https://user-images.githubusercontent.com/52708150/143726053-2daabb4e-ed1d-4042-9872-be6436bf0e29.png)
-
 ### Two waves of the epidemic were simulated
 
 https://user-images.githubusercontent.com/52708150/143726078-8110e824-c406-4249-b9c0-148e99fd7b30.mp4
-
-![image2](https://user-images.githubusercontent.com/52708150/143726094-a7bc48cd-656d-44ad-befe-ae04165fb473.png)
 
 ### Support 👨‍💻
 
