@@ -231,6 +231,9 @@ class Ui_MainWindow(object):
         self.label_15 = QtWidgets.QLabel(self.centralwidget)
         self.label_15.setGeometry(QtCore.QRect(270, 260, 121, 16))
         self.label_15.setObjectName("label_15")
+        self.auto_stop = QtWidgets.QCheckBox(self.centralwidget)
+        self.auto_stop.setGeometry(QtCore.QRect(560, 390, 70, 17))
+        self.auto_stop.setObjectName("auto_stop")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -256,6 +259,7 @@ class Ui_MainWindow(object):
         self.circle_shaped_radio.setText(_translate("MainWindow", "Circle"))
         self.label_7.setText(_translate("MainWindow", "Shape of dots without a mask"))
         self.pushButton.setText(_translate("MainWindow", "Go!"))
+        self.auto_stop.setText(_translate("MainWindow", "Auto-stop"))
         self.transmission_val.setText(
             _translate("MainWindow", str(self.transmission_rate_slider.value()))
         )
@@ -359,6 +363,7 @@ class Ui_MainWindow(object):
             f.write(("1" if self.infected_wear_mask.isChecked() else "0") + "\n")
             f.write(("1" if self.infected_slowdown.isChecked() else "0") + "\n")
             f.write(("1" if self.people_travel_slower.isChecked() else "0") + "\n")
+            f.write(("1" if self.auto_stop.isChecked() else "0") + "\n")
             sys.exit()
 
 

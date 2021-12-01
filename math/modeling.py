@@ -58,6 +58,8 @@ infected_wear_mask = bool(int(parameters[13]))
 infected_slowdown = bool(int(parameters[14]))
 people_travel_slower = bool(int(parameters[15]))
 
+auto_stop = bool(int(parameters[16]))
+
 
 # --------------------  GLOBAL VARIABLES --------------------
 
@@ -80,11 +82,13 @@ class Movement:
         """Constructor for the Movement class"""
         self.chance_to_change_direction = uniform(0.85, 1)
         self.angle = uniform(0, 50)
-        
+
         reduction_factor = 100 if not people_travel_slower else simulation_speed * 20
-        
+
         self.initial_speed = (
-            np.random.normal(loc=simulation_speed / reduction_factor, scale=100 / reduction_factor)
+            np.random.normal(
+                loc=simulation_speed / reduction_factor, scale=100 / reduction_factor
+            )
             if not dots_same_speed
             else simulation_speed / reduction_factor
         )  # Making speedy dots rarer
@@ -335,18 +339,14 @@ class Dot:
         update_values()
 
 
-def should_i_stop(number_of_healthy_dots, number_of_alive_dots) -> bool:
-    """Checks if the simulation should stop"""
-    if (number_of_healthy_dots == number_of_alive_dots) or (
-        number_of_alive_dots == -1 and number_of_healthy_dots == -1
-    ):
-        write_logs()
-        sys.exit(0)
+def stop() -> bool:
+    """Stops the simulation"""
+    write_logs()
+    sys.exit(0)
 
 
 def update_values() -> None:
     """Updates the values of the counters"""
-    number_of_alive_dots = len(dots)
     number_of_healthy_dots = len(
         [dot for dot in dots if not dot.is_infected and not dot.has_been_infected]
     )
@@ -380,8 +380,9 @@ def update_values() -> None:
             time,
         ]
     )
-
-    should_i_stop(number_of_healthy_dots, number_of_alive_dots)
+    
+    if auto_stop and number_of_healthy_dots == len(dots):
+        stop()
 
 
 def update_data() -> None:
@@ -647,7 +648,7 @@ def main() -> None:
     b_stop = Button(axstop, "Stop")
 
     # Positioning the button at bottom right corner
-    b_stop.on_clicked(lambda _: should_i_stop(-1, -1))
+    b_stop.on_clicked(lambda _: stop())
 
     # Showing the plot
     plt.show()
