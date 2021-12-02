@@ -14,6 +14,7 @@ import sys
 
 config_path = "files\\config.txt"
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -199,12 +200,12 @@ class Ui_MainWindow(object):
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_2.setObjectName("line_2")
         self.line_3 = QtWidgets.QFrame(self.centralwidget)
-        self.line_3.setGeometry(QtCore.QRect(230, 30, 16, 351))
+        self.line_3.setGeometry(QtCore.QRect(230, 30, 16, 341))
         self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
         self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_3.setObjectName("line_3")
         self.line_4 = QtWidgets.QFrame(self.centralwidget)
-        self.line_4.setGeometry(QtCore.QRect(470, 30, 16, 351))
+        self.line_4.setGeometry(QtCore.QRect(470, 30, 16, 341))
         self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
         self.line_4.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_4.setObjectName("line_4")
@@ -234,6 +235,10 @@ class Ui_MainWindow(object):
         self.auto_stop = QtWidgets.QCheckBox(self.centralwidget)
         self.auto_stop.setGeometry(QtCore.QRect(560, 390, 70, 17))
         self.auto_stop.setObjectName("auto_stop")
+        self.visual = QtWidgets.QCheckBox(self.centralwidget)
+        self.visual.setGeometry(QtCore.QRect(480, 390, 70, 17))
+        self.visual.setObjectName("visual")
+        self.visual.setChecked(True)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -257,9 +262,10 @@ class Ui_MainWindow(object):
         )
         self.dot_shaped_radio.setText(_translate("MainWindow", "Little dot"))
         self.circle_shaped_radio.setText(_translate("MainWindow", "Circle"))
-        self.label_7.setText(_translate("MainWindow", "Shape of dots without a mask"))
+        self.label_7.setText(_translate("MainWindow", "Dots shape without a mask"))
         self.pushButton.setText(_translate("MainWindow", "Go!"))
         self.auto_stop.setText(_translate("MainWindow", "Auto-stop"))
+        self.visual.setText(_translate("MainWindow", "Visual"))
         self.transmission_val.setText(
             _translate("MainWindow", str(self.transmission_rate_slider.value()))
         )
@@ -306,10 +312,12 @@ class Ui_MainWindow(object):
         self.infected_slowdown.setText(
             _translate("MainWindow", "Infected dots move slower")
         )
-        self.people_travel_slower.setText(_translate("MainWindow", "People travel slower"))
+        self.people_travel_slower.setText(
+            _translate("MainWindow", "People travel slower")
+        )
         self.label_15.setText(_translate("MainWindow", "(may increase waves)"))
 
-        # Everything here is to connect button and sliders to methods 
+        # Everything here is to connect button and sliders to methods
         self.transmission_rate_slider.valueChanged.connect(self.transmission_val.setNum)
         self.mortality_rate_slider.valueChanged.connect(self.mortality_val.setNum)
         self.time_to_cure_rate_slider.valueChanged.connect(self.cure_val.setNum)
@@ -327,6 +335,7 @@ class Ui_MainWindow(object):
             self.simulation_speed_val.setNum
         )
         self.pushButton.clicked.connect(self.go)
+        self.visual.clicked.connect(self.set_visual)
         self.label_8.setText(_translate("MainWindow", "Initial infected population"))
         self.initial_infected_val.setText(
             _translate(
@@ -337,6 +346,20 @@ class Ui_MainWindow(object):
         self.masked_dots_val.setText(
             _translate("MainWindow", f"{self.masked_dots_slider.value()}")
         )
+
+    def set_visual(self):
+        if self.visual.isChecked():
+            self.auto_stop.setChecked(True)
+            self.circle_shaped_radio.setEnabled(True)
+            self.dot_shaped_radio.setEnabled(True)
+            self.auto_stop.setEnabled(True)
+            self.auto_stop.setChecked(False)
+        else:
+            self.auto_stop.setChecked(False)
+            self.circle_shaped_radio.setEnabled(False)
+            self.dot_shaped_radio.setEnabled(False)
+            self.auto_stop.setChecked(True)
+            self.auto_stop.setEnabled(False)
 
     def adjust_maximums(self, d: int):
         self.dots_nb_val.setNum(d)
@@ -364,6 +387,7 @@ class Ui_MainWindow(object):
             f.write(("1" if self.infected_slowdown.isChecked() else "0") + "\n")
             f.write(("1" if self.people_travel_slower.isChecked() else "0") + "\n")
             f.write(("1" if self.auto_stop.isChecked() else "0") + "\n")
+            f.write(("1" if self.visual.isChecked() else "0") + "\n")
             sys.exit()
 
 

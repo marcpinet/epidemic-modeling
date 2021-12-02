@@ -59,6 +59,7 @@ infected_slowdown = bool(int(parameters[14]))
 people_travel_slower = bool(int(parameters[15]))
 
 auto_stop = bool(int(parameters[16]))
+visual = bool(int(parameters[17]))
 
 
 # --------------------  GLOBAL VARIABLES --------------------
@@ -298,15 +299,14 @@ class Dot:
 
     def update_state(self) -> None:
         """Updates the state of the dot"""
-        if -time_step < time - math.floor(time) < time_step:
-            if self.is_infected and random() < virus_mortality:
-                self.kill()
+        if self.is_infected and random() < virus_mortality:
+            self.kill()
 
-            if (not self.has_been_infected and not self.is_infected) and (
-                (self.wears_mask and random() < transmission_rate_masked)
-                or (not self.wears_mask and random() < transmission_rate)
-            ):
-                Dot.try_infect(self)
+        if (not self.has_been_infected and not self.is_infected) and (
+            (self.wears_mask and random() < transmission_rate_masked)
+            or (not self.wears_mask and random() < transmission_rate)
+        ):
+            Dot.try_infect(self)
 
         if (
             self.is_infected
@@ -329,14 +329,26 @@ class Dot:
         Args:
             dots (list): List of Dot objects
         """
+        global time
+
         for dot in dots:
             dot.move()
 
-            dot.update_state()
+            if -time_step < time - math.floor(time) < time_step:
+                dot.update_state()
 
-        update_data()
+        if visual:
+            update_data()
+            update_values()
+        else:
+            update_values_no_visual()
 
-        update_values()
+        if auto_stop and len(
+            [dot for dot in dots if not dot.is_infected and not dot.has_been_infected]
+        ) == len(dots):
+            stop()
+
+        time += time_step
 
 
 def stop() -> bool:
@@ -345,8 +357,36 @@ def stop() -> bool:
     sys.exit(0)
 
 
+def update_values_no_visual() -> None:
+    """Updates the values of the file"""
+    number_of_healthy_dots = len(
+        [dot for dot in dots if not dot.is_infected and not dot.has_been_infected]
+    )
+    number_of_infected_dots = len([dot for dot in dots if dot.is_infected])
+    number_of_cured_dots = len([dot for dot in dots if dot.has_been_infected])
+    number_of_exposed_dots = len(
+        [
+            dot
+            for dot in dots
+            if dot.is_infected and dot.infected_at + exposed_duration > time
+        ]
+    )
+    number_of_dead_dots = len([dot for dot in dead_dots_list])
+
+    sim_values_over_time.append(
+        [
+            number_of_healthy_dots,
+            number_of_infected_dots,
+            number_of_cured_dots,
+            number_of_exposed_dots,
+            number_of_dead_dots,
+            time,
+        ]
+    )
+
+
 def update_values() -> None:
-    """Updates the values of the counters"""
+    """Updates the values of the plot counters"""
     number_of_healthy_dots = len(
         [dot for dot in dots if not dot.is_infected and not dot.has_been_infected]
     )
@@ -380,9 +420,6 @@ def update_values() -> None:
             time,
         ]
     )
-    
-    if auto_stop and number_of_healthy_dots == len(dots):
-        stop()
 
 
 def update_data() -> None:
@@ -497,8 +534,6 @@ def update_data() -> None:
         [dot.y for dot in dead_dots_list if dot.wears_mask],
     )
 
-    time += time_step
-
 
 def write_logs():
     """Write simulation logs to text file."""
@@ -529,7 +564,7 @@ def generate_not_taken_index(index_list: list) -> int:
 
 def main() -> None:
     """Main function"""
-    global dots, dead_dot, graph, dots_area
+    global dots, dead_dot, graph, dots_area, dead_dots_list
 
     # Dots initialization
     dots = Dot.initalize_multiple_dots()
@@ -559,99 +594,105 @@ def main() -> None:
         dots[rdm].wears_mask = True
         already_used_indexes.append(rdm)
 
-    # Graph initialization
-    figure_dots = plt.figure(facecolor="white", figsize=(8, 6))
-    dots_area = plt.axes(xlim=(0, HEIGHT_WIDTH), ylim=(0, HEIGHT_WIDTH))
-
-    # Differentiating dots between each others
-    global healthy_dots
-    healthy_dots = dots_area.plot(
-        [dot.x for dot in dots if not dot.is_infected and not dot.wears_mask],
-        [dot.y for dot in dots if not dot.is_infected and not dot.wears_mask],
-        f"g{shape}",
-    )[0]
-
-    global infected_dots
-    infected_dots = dots_area.plot(
-        [dot.x for dot in dots if dot.is_infected and not dot.wears_mask],
-        [dot.y for dot in dots if dot.is_infected and not dot.wears_mask],
-        f"r{shape}",
-    )[0]
-
-    global cured_dots
-    cured_dots = dots_area.plot(
-        [dot.x for dot in dots if dot.has_been_infected and not dot.wears_mask],
-        [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
-        f"b{shape}",
-    )[0]
-
-    global exposed_dots
-    exposed_dots = dots_area.plot(
-        [dot.x for dot in dots if dot.has_been_infected and not dot.wears_mask],
-        [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
-        f"m{shape}",
-    )[0]
-
-    global dead_dots_list, dead_dots
     dead_dots_list = []
-    dead_dots = dots_area.plot(
-        [dot.x for dot in dead_dots_list if not dot.wears_mask],
-        [dot.y for dot in dead_dots_list if not dot.wears_mask],
-        f"k{shape}",
-    )[0]
 
-    # For masked population
+    if visual:
+        # Graph initialization
+        figure_dots = plt.figure(facecolor="white", figsize=(8, 6))
+        dots_area = plt.axes(xlim=(0, HEIGHT_WIDTH), ylim=(0, HEIGHT_WIDTH))
 
-    global healthy_dots_masked
-    healthy_dots_masked = dots_area.plot(
-        [dot.x for dot in dots if not dot.is_infected and dot.wears_mask],
-        [dot.y for dot in dots if not dot.is_infected and dot.wears_mask],
-        f"g{maskedShape}",
-    )[0]
+        # Differentiating dots between each others
+        global healthy_dots
+        healthy_dots = dots_area.plot(
+            [dot.x for dot in dots if not dot.is_infected and not dot.wears_mask],
+            [dot.y for dot in dots if not dot.is_infected and not dot.wears_mask],
+            f"g{shape}",
+        )[0]
 
-    global infected_dots_masked
-    infected_dots_masked = dots_area.plot(
-        [dot.x for dot in dots if dot.is_infected and dot.wears_mask],
-        [dot.y for dot in dots if dot.is_infected and dot.wears_mask],
-        f"r{maskedShape}",
-    )[0]
+        global infected_dots
+        infected_dots = dots_area.plot(
+            [dot.x for dot in dots if dot.is_infected and not dot.wears_mask],
+            [dot.y for dot in dots if dot.is_infected and not dot.wears_mask],
+            f"r{shape}",
+        )[0]
 
-    global cured_dots_masked
-    cured_dots_masked = dots_area.plot(
-        [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
-        [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
-        f"b{maskedShape}",
-    )[0]
+        global cured_dots
+        cured_dots = dots_area.plot(
+            [dot.x for dot in dots if dot.has_been_infected and not dot.wears_mask],
+            [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
+            f"b{shape}",
+        )[0]
 
-    global exposed_dots_masked
-    exposed_dots_masked = dots_area.plot(
-        [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
-        [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
-        f"m{maskedShape}",
-    )[0]
+        global exposed_dots
+        exposed_dots = dots_area.plot(
+            [dot.x for dot in dots if dot.has_been_infected and not dot.wears_mask],
+            [dot.y for dot in dots if dot.has_been_infected and not dot.wears_mask],
+            f"m{shape}",
+        )[0]
 
-    global dead_dots_masked
-    dead_dots_masked = dots_area.plot(
-        [dot.x for dot in dead_dots_list if dot.wears_mask],
-        [dot.y for dot in dead_dots_list if dot.wears_mask],
-        f"k{maskedShape}",
-    )[0]
+        global dead_dots
+        dead_dots = dots_area.plot(
+            [dot.x for dot in dead_dots_list if not dot.wears_mask],
+            [dot.y for dot in dead_dots_list if not dot.wears_mask],
+            f"k{shape}",
+        )[0]
 
-    # We need to keep this in an unused variable, otherwise the function won't work
-    _ = anim.FuncAnimation(
-        figure_dots, lambda z: Dot.move_all(dots), frames=60, interval=0
-    )
-    dots_area.axis("off")
+        # For masked population
 
-    # Button to stop the simulation
-    axstop = figure_dots.add_axes([0.88, 0.02, 0.1, 0.075])
-    b_stop = Button(axstop, "Stop")
+        global healthy_dots_masked
+        healthy_dots_masked = dots_area.plot(
+            [dot.x for dot in dots if not dot.is_infected and dot.wears_mask],
+            [dot.y for dot in dots if not dot.is_infected and dot.wears_mask],
+            f"g{maskedShape}",
+        )[0]
 
-    # Positioning the button at bottom right corner
-    b_stop.on_clicked(lambda _: stop())
+        global infected_dots_masked
+        infected_dots_masked = dots_area.plot(
+            [dot.x for dot in dots if dot.is_infected and dot.wears_mask],
+            [dot.y for dot in dots if dot.is_infected and dot.wears_mask],
+            f"r{maskedShape}",
+        )[0]
 
-    # Showing the plot
-    plt.show()
+        global cured_dots_masked
+        cured_dots_masked = dots_area.plot(
+            [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
+            [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
+            f"b{maskedShape}",
+        )[0]
+
+        global exposed_dots_masked
+        exposed_dots_masked = dots_area.plot(
+            [dot.x for dot in dots if dot.has_been_infected and dot.wears_mask],
+            [dot.y for dot in dots if dot.has_been_infected and dot.wears_mask],
+            f"m{maskedShape}",
+        )[0]
+
+        global dead_dots_masked
+        dead_dots_masked = dots_area.plot(
+            [dot.x for dot in dead_dots_list if dot.wears_mask],
+            [dot.y for dot in dead_dots_list if dot.wears_mask],
+            f"k{maskedShape}",
+        )[0]
+
+        # We need to keep this in an unused variable, otherwise the function won't work
+        _ = anim.FuncAnimation(
+            figure_dots, lambda z: Dot.move_all(dots), frames=60, interval=0
+        )
+        dots_area.axis("off")
+
+        # Button to stop the simulation
+        axstop = figure_dots.add_axes([0.88, 0.02, 0.1, 0.075])
+        b_stop = Button(axstop, "Stop")
+
+        # Positioning the button at bottom right corner
+        b_stop.on_clicked(lambda _: stop())
+
+        # Showing the plot
+        plt.show()
+
+    else:
+        while True:
+            Dot.move_all(dots)
 
 
 # -------------------- MAIN CALL --------------------
