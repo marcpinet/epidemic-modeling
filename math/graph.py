@@ -45,10 +45,15 @@ def create(file):
     dead_smooth = splev(time, dead_bspline)
 
     # Setting up plots
+
+    # Not smoothed
     # plt.plot(time, healthy, color="green")
     # plt.plot(time, infected, color="red")
+    # plt.plot(time, exposed, color="purple")
     # plt.plot(time, cured, color="blue")
     # plt.plot(time, dead, color="black")
+
+    # Smoothed
     plt.plot(time, healthy_smooth, label="Healthy", color="green")
     plt.plot(time, infected_smooth, label="Infected", color="red")
     plt.plot(time, exposed_smooth, label="Exposed", color="purple")
