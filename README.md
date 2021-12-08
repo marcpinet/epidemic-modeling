@@ -28,11 +28,14 @@
 
 ### One wave of the epidemic was simulated
 
-https://user-images.githubusercontent.com/52708150/143726042-e39aaaaf-ed5b-44b6-a826-ed4cf5c1d47c.mp4
+https://user-images.githubusercontent.com/52708150/145208365-adcee61b-56a5-4ba5-81cf-75e5ef543743.mp4
 
-### Two waves of the epidemic were simulated
+### Three waves of the epidemic were simulated
 
-https://user-images.githubusercontent.com/52708150/143726078-8110e824-c406-4249-b9c0-148e99fd7b30.mp4
+https://user-images.githubusercontent.com/52708150/145208362-3c5b83fc-4aad-413e-8f34-2a65b520413e.mp4
+### Masked dots example
+
+https://user-images.githubusercontent.com/52708150/145208356-1e540f3a-dfaa-4879-b820-f5f1fd648a2a.mp4
 
 ### Support 👨‍💻
 
