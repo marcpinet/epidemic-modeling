@@ -17,7 +17,7 @@ def create(file):
         # In case the simulation has crashed and the logs couldn't be written we avoid adding another error message that would flood the console
         if not lines:
             sys.exit(1)
-        
+
     for line in lines:
         line = line.split(", ")
         healthy.append(int(line[0]))
@@ -27,7 +27,6 @@ def create(file):
         dead.append(int(line[4]))
         time.append(float(line[5].strip("\n")))
 
-    
     # Making the curve smoother before ploting
     healthy_bspline = splrep(time, healthy, s=5000)
     healthy_smooth = splev(time, healthy_bspline)

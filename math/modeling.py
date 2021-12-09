@@ -674,8 +674,8 @@ def main() -> None:
 
         global cured_dots_masked
         cured_dots_masked = dots_area.plot(
-        [dot.x for dot in Dot.get_all_cured() if dot.wears_mask],
-        [dot.y for dot in Dot.get_all_cured() if dot.wears_mask],
+            [dot.x for dot in Dot.get_all_cured() if dot.wears_mask],
+            [dot.y for dot in Dot.get_all_cured() if dot.wears_mask],
             f"b{maskedShape}",
         )[0]
 
