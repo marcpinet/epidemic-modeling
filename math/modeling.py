@@ -51,6 +51,7 @@ transmission_rate_masked = (
 )  # Chance of a masked dot to be infected and to infect a healthy dot
 
 simulation_speed = float(parameters[10])
+rounded_sim_speed = math.floor(simulation_speed)
 
 collision_enabled = bool(int(parameters[11]))
 dots_same_speed = bool(int(parameters[12]))
@@ -71,6 +72,9 @@ BORDER_MAX = HEIGHT_WIDTH - 1  # maximum distance from the border
 
 time = 0  # Time to initialize
 time_step = simulation_speed / 100  # Time step for the simulation
+dots_spawn_spacing_constant = 2  # Spacing between dots when they spawn
+
+time_used_to_update = 0
 
 
 # -------------------- CLASSES & METHODS --------------------
@@ -137,7 +141,7 @@ class Dot:
         """
         for coord in already_used_coords:
             a = Dot(x, y)
-            if a.get_distance(coord[0], coord[1]) < minimal_distance:
+            if a.get_distance(coord[0], coord[1]) < dots_spawn_spacing_constant:
                 return False
         return True
 
@@ -240,7 +244,7 @@ class Dot:
         """Handles collisions between dots"""
         # To avoid checking already checked dots, I preferred to use a for-range rather that a for-each loop
         i = self.id
-        while(i != len(dots) - 1):
+        while i != len(dots) - 1:
             if self.get_distance(dots[i].x, dots[i].y) < 1.4 and self.id != dots[i].id:
                 # Whenever a dot makes contact with another dot, it will bounce back
                 self.velx *= -1
@@ -286,6 +290,7 @@ class Dot:
             self.y = BORDER_MIN
             self.vely *= -1
 
+    # This method isn't used in the code. Feel free to use it instead of the current move method.
     def anarchic_move(self) -> None:
         """Moves the dot and makes sure they don't go out of the area or touch each other. They've 4% chance to change direction."""
         self.x += self.velx
@@ -347,7 +352,11 @@ class Dot:
 
     def update_state(self) -> None:
         """Updates the state of the dot"""
-        if self.is_infected and random() < virus_mortality:
+        if (
+            not self.is_only_exposed()
+            and self.is_infected
+            and random() < virus_mortality
+        ):
             self.kill()
 
         if (not self.has_been_infected and not self.is_infected) and (
@@ -377,13 +386,14 @@ class Dot:
         Args:
             dots (list): List of Dot objects
         """
-        global time
+        global time, time_used_to_update
 
         for dot in dots:
             dot.move()
 
-            if -time_step < time - math.floor(time) < time_step:
+            if (time_used_to_update - 1) % rounded_sim_speed:
                 dot.update_state()
+                time_used_to_update = 0
 
         if visual:
             update_data()
@@ -397,6 +407,7 @@ class Dot:
             stop()
 
         time += time_step
+        time_used_to_update += 1
 
 
 def stop() -> bool:
