@@ -11,7 +11,11 @@ def suppress_qt_warnings():
 if __name__ == "__main__":
     suppress_qt_warnings()
 
-    os.mkdir("files")
+    try:
+        os.mkdir("files")
+    except FileExistsError:
+        pass
+    
     with open("files\\logs.txt", "w") as f:
         f.write("")
 
