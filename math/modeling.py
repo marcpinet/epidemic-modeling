@@ -239,14 +239,16 @@ class Dot:
     def handle_collisions(self) -> None:
         """Handles collisions between dots"""
         # To avoid checking already checked dots, I preferred to use a for-range rather that a for-each loop
-        for i in range(self.id, len(dots)):
-            if self.get_distance(dots[i].x, dots[i].y) < 1.2 and self.id != dots[i].id:
+        i = self.id
+        while(i != len(dots) - 1):
+            if self.get_distance(dots[i].x, dots[i].y) < 1.4 and self.id != dots[i].id:
                 # Whenever a dot makes contact with another dot, it will bounce back
                 self.velx *= -1
                 self.vely *= -1
                 dots[i].velx *= -1
                 dots[i].vely *= -1
                 break
+            i += 1
 
     def move(self) -> None:
         """Moves the dot and makes sure they don't go out of the area or touch each other.
