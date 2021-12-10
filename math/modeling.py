@@ -9,6 +9,19 @@ import sys
 import numpy as np
 
 
+# --------------------  GLOBAL VARIABLES --------------------
+
+
+HEIGHT_WIDTH = 100  # Window height and width (yes, window shape must be a square)
+BORDER_MIN = 1  # minimum distance from the border
+BORDER_MAX = HEIGHT_WIDTH - 1  # maximum distance from the border
+
+time = 0  # Time to initialize
+dots_spawn_spacing_constant = 2  # Spacing between dots when they spawn
+
+time_used_to_update = 0
+
+
 # --------------------  GLOBAL PARAMETERS (RETRIVED FROM FILE) --------------------
 
 logs = []
@@ -27,13 +40,17 @@ with open(file, "r") as f:
         line = line.replace("\n", "")
         parameters.append(line)
 
+simulation_speed = float(parameters[10])
+time_step = simulation_speed / 100  # Time step for the simulation
 sim_values_over_time = []
-transmission_rate = int(parameters[0]) / 100  # Chance of a dot to be infected
-time_to_cure = int(parameters[2])  # Time to cure a dot
-virus_mortality = (
-    int(parameters[1]) / 1000 / time_to_cure / 2
-)  # Chance of a dot to die per tick
 
+transmission_rate = (
+    int(parameters[0]) / 100
+)  # Chance of a dot to be infected
+
+infected_duration = int(
+    parameters[2]
+)  # Time to cure a dot (during this time, dot is infected)
 immunity_duration = int(parameters[3])  # Time before being contagious again
 number_of_dots = int(parameters[4])  # number of dots to generate
 minimal_distance = int(
@@ -50,8 +67,11 @@ transmission_rate_masked = (
     transmission_rate * 0.2
 )  # Chance of a masked dot to be infected and to infect a healthy dot
 
-simulation_speed = float(parameters[10])
 rounded_sim_speed = math.floor(simulation_speed)
+
+mortality_rate = (
+    int(parameters[1]) / 1000 / infected_duration
+)  # Chance of a dot to die per tick
 
 collision_enabled = bool(int(parameters[11]))
 dots_same_speed = bool(int(parameters[12]))
@@ -63,19 +83,6 @@ auto_stop = bool(int(parameters[16]))
 visual = bool(int(parameters[17]))
 
 collision_distance = 1.3 if shape == "o" else 0.65
-
-# --------------------  GLOBAL VARIABLES --------------------
-
-
-HEIGHT_WIDTH = 100  # Window height and width (yes, window shape must be a square)
-BORDER_MIN = 1  # minimum distance from the border
-BORDER_MAX = HEIGHT_WIDTH - 1  # maximum distance from the border
-
-time = 0  # Time to initialize
-time_step = simulation_speed / 100  # Time step for the simulation
-dots_spawn_spacing_constant = 2  # Spacing between dots when they spawn
-
-time_used_to_update = 0
 
 
 # -------------------- CLASSES & METHODS --------------------
@@ -362,7 +369,7 @@ class Dot:
         if (
             not self.is_only_exposed()
             and self.is_infected
-            and random() < virus_mortality
+            and random() < mortality_rate
         ):
             self.kill()
 
@@ -375,7 +382,7 @@ class Dot:
         if (
             self.is_infected
             and self.infected_at != -1
-            and self.infected_at + time_to_cure < time
+            and self.infected_at + infected_duration < time
         ):
             self.become_immune()
 
