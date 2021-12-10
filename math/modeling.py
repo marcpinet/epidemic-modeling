@@ -156,7 +156,7 @@ class Dot:
         Returns:
             float: distance between the two dots
         """
-        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+        return math.hypot(x - self.x, y - self.y)  # Another way but more laggy: math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     @staticmethod
     def initalize_multiple_dots() -> list:
