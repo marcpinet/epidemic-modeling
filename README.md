@@ -80,6 +80,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## Contributions
 
-Special thanks to [loicpantano](https://github.com/loicpantano) for some ideas and [marcusaasjensen](https://github.com/marcusaasjensen) for its participation in the project (he made a its own simulation in C# of an airport with graphs, see [marcus' simulation](https://github.com/marcusaasjensen/covid-simulation)).
+Special thanks to [loicpantano](https://github.com/loicpantano) for some ideas and [marcusaasjensen](https://github.com/marcusaasjensen) for its participation in the project (he made a its own simulation in C# of an airport with graphs, see [marcus' simulation](https://github.com/marcusaasjensenunice/covid-simulation)).
 
 We were in the same team for this project and we worked together on different programs.
