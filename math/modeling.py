@@ -156,7 +156,9 @@ class Dot:
         Returns:
             float: distance between the two dots
         """
-        return math.hypot(x - self.x, y - self.y)  # Another way but more laggy: math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+        return math.hypot(
+            x - self.x, y - self.y
+        )  # Another way but more laggy: math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     @staticmethod
     def initalize_multiple_dots() -> list:
@@ -423,7 +425,7 @@ def stop() -> bool:
 
 def update_values_no_visual() -> None:
     """Updates the values of the file"""
-    number_of_healthy_dots = len(Dot.get_all_heathy())
+    number_of_healthy_dots = len(Dot.get_all_healthy())
     number_of_infected_dots = len(Dot.get_all_infected())
     number_of_cured_dots = len(Dot.get_all_cured())
     number_of_exposed_dots = len(Dot.get_all_exposed())
