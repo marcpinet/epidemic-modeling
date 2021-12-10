@@ -46,18 +46,18 @@ def create(file):
     # Setting up plots
 
     # Not smoothed
-    # plt.plot(time, healthy, color="green")
-    # plt.plot(time, infected, color="red")
-    # plt.plot(time, exposed, color="purple")
-    # plt.plot(time, cured, color="blue")
-    # plt.plot(time, dead, color="black")
+    plt.plot(time, healthy, color="green")
+    plt.plot(time, infected, color="red")
+    plt.plot(time, exposed, color="magenta")
+    plt.plot(time, cured, color="blue")
+    plt.plot(time, dead, color="black")
 
     # Smoothed
-    plt.plot(time, healthy_smooth, label="Healthy", color="green")
-    plt.plot(time, infected_smooth, label="Infected", color="red")
-    plt.plot(time, exposed_smooth, label="Exposed", color="purple")
-    plt.plot(time, cured_smooth, label="Immune", color="blue")
-    plt.plot(time, dead_smooth, label="Dead", color="black")
+    # plt.plot(time, healthy_smooth, label="Healthy", color="green")
+    # plt.plot(time, infected_smooth, label="Infected", color="red")
+    # plt.plot(time, exposed_smooth, label="Exposed", color="magenta")
+    # plt.plot(time, cured_smooth, label="Immune", color="blue")
+    # plt.plot(time, dead_smooth, label="Dead", color="black")
 
     # Setting up graphic title and legend properties
     plt.title("Epidemic modeling", loc="center")
