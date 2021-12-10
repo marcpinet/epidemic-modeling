@@ -251,7 +251,7 @@ class Dot:
                 self.id != dot.id
                 and self.get_distance(dot.x, dot.y) < collision_distance
             ):
-                # Whenever a dot makes contact with another dot, it will bounce back
+                # Whenever a dot makes contact with another dot, both will bounce back (their direction will be inverted)
                 self.velx *= -1
                 self.vely *= -1
                 dot.velx *= -1
