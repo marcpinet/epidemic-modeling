@@ -31,7 +31,7 @@ sim_values_over_time = []
 transmission_rate = int(parameters[0]) / 100  # Chance of a dot to be infected
 time_to_cure = int(parameters[2])  # Time to cure a dot
 virus_mortality = (
-    int(parameters[1]) / 1000 / time_to_cure
+    int(parameters[1]) / 1000 / time_to_cure / 2
 )  # Chance of a dot to die per tick
 
 immunity_duration = int(parameters[3])  # Time before being contagious again
@@ -423,6 +423,20 @@ def stop() -> bool:
     sys.exit(0)
 
 
+def show_data(
+    number_of_healthy_dots,
+    number_of_infected_dots,
+    number_of_cured_dots,
+    number_of_exposed_dots,
+    number_of_dead_dots,
+    time,
+) -> None:
+    """Shows the data on prompt"""
+    print(
+        f"{number_of_healthy_dots} healthy, {number_of_infected_dots} infected, {number_of_cured_dots} cured, {number_of_exposed_dots} exposed, {number_of_dead_dots} dead, {int(time)} days"
+    )
+
+
 def update_values_no_visual() -> None:
     """Updates the values of the file"""
     number_of_healthy_dots = len(Dot.get_all_healthy())
@@ -440,6 +454,15 @@ def update_values_no_visual() -> None:
             number_of_dead_dots,
             time,
         ]
+    )
+
+    show_data(
+        number_of_healthy_dots,
+        number_of_infected_dots,
+        number_of_cured_dots,
+        number_of_exposed_dots,
+        number_of_dead_dots,
+        time,
     )
 
 
