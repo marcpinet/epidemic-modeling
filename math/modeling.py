@@ -62,6 +62,7 @@ people_travel_slower = bool(int(parameters[15]))
 auto_stop = bool(int(parameters[16]))
 visual = bool(int(parameters[17]))
 
+collision_distance = 1.3 if shape == "o" else 0.65
 
 # --------------------  GLOBAL VARIABLES --------------------
 
@@ -99,7 +100,7 @@ class Movement:
         )  # Making speedy dots rarer
         self.speed = self.initial_speed
 
-    def speed_back_to_normal(self):
+    def speed_back_to_normal(self) -> None:
         """Method that resets the speed back to its original value"""
         self.speed = self.initial_speed
 
@@ -244,13 +245,14 @@ class Dot:
         """Handles collisions between dots"""
         # To avoid checking already checked dots, I preferred to use a for-range rather that a for-each loop
         i = self.id
-        while i != len(dots) - 1:
-            if self.get_distance(dots[i].x, dots[i].y) < 1.4 and self.id != dots[i].id:
+        while i < len(dots):
+            dot = dots[i]
+            if self.id != dot.id and self.get_distance(dot.x, dot.y) < collision_distance:
                 # Whenever a dot makes contact with another dot, it will bounce back
                 self.velx *= -1
                 self.vely *= -1
-                dots[i].velx *= -1
-                dots[i].vely *= -1
+                dot.velx *= -1
+                dot.vely *= -1
                 break
             i += 1
 
@@ -317,7 +319,7 @@ class Dot:
             self.y = BORDER_MIN
             self.vely *= -1
 
-    def become_infected(self):
+    def become_infected(self) -> None:
         """Infects the dot"""
         self.is_infected = True
         self.infected_at = time
@@ -538,7 +540,7 @@ def update_data() -> None:
     )
 
 
-def write_logs():
+def write_logs() -> None:
     """Write simulation logs to text file."""
     with open("files\\logs.txt", "a") as f:
         for values in sim_values_over_time:
