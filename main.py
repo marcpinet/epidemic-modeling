@@ -15,10 +15,14 @@ if __name__ == "__main__":
         os.mkdir("files")
     except FileExistsError:
         pass
-    
+
     with open("files\\logs.txt", "w") as f:
         f.write("")
 
+    print("Select the settings you want for the simulation...")
     os.system("python ui\\ui.py")
+    print("Simulating...")
     os.system("python math\\modeling.py files\\config.txt")
+    print("Generating plot...")
     os.system("python math\\graph.py files\\logs.txt")
+    print("Done!")
