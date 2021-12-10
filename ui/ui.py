@@ -170,7 +170,7 @@ class Ui_MainWindow(object):
         self.label_11.setObjectName("label_11")
         self.simulation_speed_slider = QtWidgets.QSlider(self.centralwidget)
         self.simulation_speed_slider.setGeometry(QtCore.QRect(540, 100, 160, 22))
-        self.simulation_speed_slider.setMinimum(0)
+        self.simulation_speed_slider.setMinimum(2)
         self.simulation_speed_slider.setMaximum(100)
         self.simulation_speed_slider.setSingleStep(1)
         self.simulation_speed_slider.setProperty("value", 10)
