@@ -243,11 +243,14 @@ class Dot:
 
     def handle_collisions(self) -> None:
         """Handles collisions between dots"""
-        # To avoid checking already checked dots, I preferred to use a for-range rather that a for-each loop
+        # To avoid checking already checked dots, I check every iteration the id of the dot
         i = self.id
         while i < len(dots):
             dot = dots[i]
-            if self.id != dot.id and self.get_distance(dot.x, dot.y) < collision_distance:
+            if (
+                self.id != dot.id
+                and self.get_distance(dot.x, dot.y) < collision_distance
+            ):
                 # Whenever a dot makes contact with another dot, it will bounce back
                 self.velx *= -1
                 self.vely *= -1
