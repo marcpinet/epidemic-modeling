@@ -405,7 +405,8 @@ class Dot:
         for dot in dots:
             dot.move()
 
-            if (time_used_to_update - 1) % rounded_sim_speed:
+            # When a day passed (yes, this is the only way I could find, but it works and I think it's pretty good)
+            if math.floor(time + time_step) == math.floor(time) + 1:
                 dot.update_state()
                 time_used_to_update = 0
 
