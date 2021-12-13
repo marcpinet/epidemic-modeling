@@ -10,7 +10,7 @@
 
 🔬 Randomized simulation 🔬
 
-🧫 Inspired by [SEIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) 🧫
+🧫 Inspired by [SEIDR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) 🧫
 
 ## Features
 
