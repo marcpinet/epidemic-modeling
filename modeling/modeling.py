@@ -64,7 +64,7 @@ maskedShape = "P"
 # For masked population
 transmission_rate_masked = (
     transmission_rate * 0.2
-)  # Chance of a masked dot to be infected and to infect a healthy dot
+)  # Chance of a masked dot to be infected and to infect a susceptible dot
 
 mortality_rate = (
     int(parameters[1]) / 1000 / infected_duration
@@ -125,7 +125,7 @@ class Dot:
         self.is_infected = False
         self.infected_at = -1
         self.has_been_infected = False
-        self.cured_at = -1
+        self.recovered_at = -1
         self.wears_mask = False
         self.was_originally_wearing_mask = False
         self.movement = (
@@ -188,11 +188,11 @@ class Dot:
         return dots
 
     @staticmethod
-    def get_all_healthy() -> list:
-        """Gets all the healthy dots
+    def get_all_susceptible() -> list:
+        """Gets all the susceptible dots
 
         Returns:
-            list: list of healthy dots
+            list: list of susceptible dots
         """
         return [
             dot for dot in dots if not dot.is_infected and not dot.has_been_infected
@@ -217,11 +217,11 @@ class Dot:
         return [dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]
 
     @staticmethod
-    def get_all_cured() -> list:
-        """Gets all the cured dots
+    def get_all_recovered() -> list:
+        """Gets all the recovered dots
 
         Returns:
-            list: list of cured dots
+            list: list of recovered dots
         """
         return [dot for dot in dots if dot.has_been_infected]
 
@@ -346,21 +346,21 @@ class Dot:
         dead_dots_list.append(self)
         dots.remove(self)
 
-    def become_immune(self) -> None:
-        """Makes the dot immune"""
+    def become_recovered(self) -> None:
+        """Makes the dot recovered"""
         self.is_infected = False
         self.has_been_infected = True
-        self.cured_at = time
+        self.recovered_at = time
         self.movement.speed_back_to_normal()
 
         if infected_wear_mask and not self.was_originally_wearing_mask:
             self.wears_mask = False
 
-    def become_healthy(self) -> None:
-        """Makes the dot healthy"""
+    def become_susceptible(self) -> None:
+        """Makes the dot susceptible"""
         self.has_been_infected = False
         self.infected_at = -1
-        self.cured_at = -1
+        self.recovered_at = -1
 
     def update_state(self) -> None:
         """Updates the state of the dot"""
@@ -382,14 +382,14 @@ class Dot:
             and self.infected_at != -1
             and self.infected_at + infected_duration < time
         ):
-            self.become_immune()
+            self.become_recovered()
 
         if (
             self.has_been_infected
-            and self.cured_at != -1
-            and self.cured_at + immunity_duration < time
+            and self.recovered_at != -1
+            and self.recovered_at + immunity_duration < time
         ):
-            self.become_healthy()
+            self.become_susceptible()
 
     @staticmethod
     def move_all(dots: list) -> None:
@@ -436,32 +436,32 @@ def stop() -> None:
 
 
 def show_data(
-    number_of_healthy_dots,
+    number_of_susceptible_dots,
     number_of_infected_dots,
-    number_of_cured_dots,
+    number_of_recovered_dots,
     number_of_exposed_dots,
     number_of_dead_dots,
     time,
 ) -> None:
     """Shows the data on prompt"""
     print(
-        f"{number_of_healthy_dots} healthy, {number_of_infected_dots} infected, {number_of_cured_dots} cured, {number_of_exposed_dots} exposed, {number_of_dead_dots} dead, {int(time)} days"
+        f"{number_of_susceptible_dots} susceptible, {number_of_infected_dots} infected, {number_of_recovered_dots} recovered, {number_of_exposed_dots} exposed, {number_of_dead_dots} dead, {int(time)} days"
     )
 
 
 def update_values_no_visual() -> None:
     """Updates the values of the file"""
-    number_of_healthy_dots = len(Dot.get_all_healthy())
+    number_of_susceptible_dots = len(Dot.get_all_susceptible())
     number_of_infected_dots = len(Dot.get_all_infected())
-    number_of_cured_dots = len(Dot.get_all_cured())
+    number_of_recovered_dots = len(Dot.get_all_recovered())
     number_of_exposed_dots = len(Dot.get_all_exposed())
     number_of_dead_dots = len(dead_dots_list)
 
     sim_values_over_time.append(
         [
-            number_of_healthy_dots,
+            number_of_susceptible_dots,
             number_of_infected_dots,
-            number_of_cured_dots,
+            number_of_recovered_dots,
             number_of_exposed_dots,
             number_of_dead_dots,
             time,
@@ -469,9 +469,9 @@ def update_values_no_visual() -> None:
     )
 
     show_data(
-        number_of_healthy_dots,
+        number_of_susceptible_dots,
         number_of_infected_dots,
-        number_of_cured_dots,
+        number_of_recovered_dots,
         number_of_exposed_dots,
         number_of_dead_dots,
         time,
@@ -480,26 +480,26 @@ def update_values_no_visual() -> None:
 
 def update_values() -> None:
     """Updates the values of the plot counters"""
-    number_of_healthy_dots = len(Dot.get_all_healthy())
+    number_of_susceptible_dots = len(Dot.get_all_susceptible())
     number_of_infected_dots = len(Dot.get_all_infected())
-    number_of_cured_dots = len(Dot.get_all_cured())
+    number_of_recovered_dots = len(Dot.get_all_recovered())
     number_of_exposed_dots = len(Dot.get_all_exposed())
     number_of_dead_dots = len(dead_dots_list)
 
     dots_area.set_title(
-        f"Healthy: {number_of_healthy_dots}"
+        f"Susceptible: {number_of_susceptible_dots}"
         + f"   |   Exposed: {number_of_exposed_dots}"
         + f"   |   Infected: {number_of_infected_dots}"
-        + f"   |   Cured: {number_of_cured_dots}"
+        + f"   |   Recovered: {number_of_recovered_dots}"
         + f"   |   Dead: {number_of_dead_dots}"
         + f"   |   Days: {round(time)}"
     )
 
     sim_values_over_time.append(
         [
-            number_of_healthy_dots,
+            number_of_susceptible_dots,
             number_of_infected_dots,
-            number_of_cured_dots,
+            number_of_recovered_dots,
             number_of_exposed_dots,
             number_of_dead_dots,
             time,
@@ -509,11 +509,11 @@ def update_values() -> None:
 
 def update_data() -> None:
     """Updates the data of the plot"""
-    global healthy_dots, infected_dots, cured_dots, time, dead_dots, dots_area, healthy_dots, infected_dots, cured_dots, dead_dots_masked, exposed_dots, exposed_dots_masked
+    global susceptible_dots, infected_dots, recovered_dots, time, dead_dots, dots_area, susceptible_dots, infected_dots, recovered_dots, dead_dots_masked, exposed_dots, exposed_dots_masked
 
-    healthy_dots.set_data(
-        [dot.x for dot in Dot.get_all_healthy() if not dot.wears_mask],
-        [dot.y for dot in Dot.get_all_healthy() if not dot.wears_mask],
+    susceptible_dots.set_data(
+        [dot.x for dot in Dot.get_all_susceptible() if not dot.wears_mask],
+        [dot.y for dot in Dot.get_all_susceptible() if not dot.wears_mask],
     )
 
     exposed_dots.set_data(
@@ -534,9 +534,9 @@ def update_data() -> None:
         ],
     )
 
-    cured_dots.set_data(
-        [dot.x for dot in Dot.get_all_cured() if not dot.wears_mask],
-        [dot.y for dot in Dot.get_all_cured() if not dot.wears_mask],
+    recovered_dots.set_data(
+        [dot.x for dot in Dot.get_all_recovered() if not dot.wears_mask],
+        [dot.y for dot in Dot.get_all_recovered() if not dot.wears_mask],
     )
 
     dead_dots.set_data(
@@ -546,9 +546,9 @@ def update_data() -> None:
 
     # For masked dots
 
-    healthy_dots_masked.set_data(
-        [dot.x for dot in Dot.get_all_healthy() if dot.wears_mask],
-        [dot.y for dot in Dot.get_all_healthy() if dot.wears_mask],
+    susceptible_dots_masked.set_data(
+        [dot.x for dot in Dot.get_all_susceptible() if dot.wears_mask],
+        [dot.y for dot in Dot.get_all_susceptible() if dot.wears_mask],
     )
 
     exposed_dots_masked.set_data(
@@ -569,9 +569,9 @@ def update_data() -> None:
         ],
     )
 
-    cured_dots_masked.set_data(
-        [dot.x for dot in Dot.get_all_cured() if dot.wears_mask],
-        [dot.y for dot in Dot.get_all_cured() if dot.wears_mask],
+    recovered_dots_masked.set_data(
+        [dot.x for dot in Dot.get_all_recovered() if dot.wears_mask],
+        [dot.y for dot in Dot.get_all_recovered() if dot.wears_mask],
     )
 
     dead_dots_masked.set_data(
@@ -653,8 +653,8 @@ def main() -> None:
         dots_area = plt.axes(xlim=(0, HEIGHT_WIDTH), ylim=(0, HEIGHT_WIDTH))
 
         # Differentiating dots between each others
-        global healthy_dots
-        healthy_dots = dots_area.plot(
+        global susceptible_dots
+        susceptible_dots = dots_area.plot(
             [dot.x for dot in dots if not dot.is_infected and not dot.wears_mask],
             [dot.y for dot in dots if not dot.is_infected and not dot.wears_mask],
             f"g{shape}",
@@ -682,10 +682,10 @@ def main() -> None:
             f"r{shape}",
         )[0]
 
-        global cured_dots
-        cured_dots = dots_area.plot(
-            [dot.x for dot in Dot.get_all_cured() if not dot.wears_mask],
-            [dot.y for dot in Dot.get_all_cured() if not dot.wears_mask],
+        global recovered_dots
+        recovered_dots = dots_area.plot(
+            [dot.x for dot in Dot.get_all_recovered() if not dot.wears_mask],
+            [dot.y for dot in Dot.get_all_recovered() if not dot.wears_mask],
             f"b{shape}",
         )[0]
 
@@ -698,10 +698,10 @@ def main() -> None:
 
         # For masked population
 
-        global healthy_dots_masked
-        healthy_dots_masked = dots_area.plot(
-            [dot.x for dot in Dot.get_all_healthy() if dot.wears_mask],
-            [dot.y for dot in Dot.get_all_healthy() if dot.wears_mask],
+        global susceptible_dots_masked
+        susceptible_dots_masked = dots_area.plot(
+            [dot.x for dot in Dot.get_all_susceptible() if dot.wears_mask],
+            [dot.y for dot in Dot.get_all_susceptible() if dot.wears_mask],
             f"g{maskedShape}",
         )[0]
 
@@ -727,10 +727,10 @@ def main() -> None:
             f"r{maskedShape}",
         )[0]
 
-        global cured_dots_masked
-        cured_dots_masked = dots_area.plot(
-            [dot.x for dot in Dot.get_all_cured() if dot.wears_mask],
-            [dot.y for dot in Dot.get_all_cured() if dot.wears_mask],
+        global recovered_dots_masked
+        recovered_dots_masked = dots_area.plot(
+            [dot.x for dot in Dot.get_all_recovered() if dot.wears_mask],
+            [dot.y for dot in Dot.get_all_recovered() if dot.wears_mask],
             f"b{maskedShape}",
         )[0]
 
