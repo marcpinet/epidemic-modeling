@@ -122,7 +122,7 @@ class Ui_MainWindow(object):
         self.initial_infected_val = QtWidgets.QLabel(self.centralwidget)
         self.initial_infected_val.setGeometry(QtCore.QRect(30, 350, 21, 16))
         self.initial_infected_val.setObjectName("initial_infected_val")
-        self.initial_infected_val.setProperty("value", 0)
+        self.initial_infected_val.setProperty("vazlue", 0)
         self.initial_infected_population_slider = QtWidgets.QSlider(self.centralwidget)
         self.initial_infected_population_slider.setGeometry(
             QtCore.QRect(60, 350, 160, 22)
