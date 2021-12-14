@@ -379,7 +379,7 @@ class Ui_MainWindow(object):
             f.write(self.initial_infected_val.text() + "\n")
             f.write(self.masked_dots_val.text() + "\n")
             f.write(self.incubation_val.text() + "\n")
-            f.write("." if self.dot_shaped_radio.isChecked() else "o" + "\n")
+            f.write(("." if self.dot_shaped_radio.isChecked() else "o") + "\n")
             f.write(self.simulation_speed_val.text() + "\n")
             f.write(("1" if self.collision.isChecked() else "0") + "\n")
             f.write(("1" if self.dots_same_speed.isChecked() else "0") + "\n")
