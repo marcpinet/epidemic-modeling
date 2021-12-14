@@ -20,6 +20,7 @@ time = 0  # Time to initialize
 dots_spawn_spacing_constant = 2  # Spacing between dots when they spawn
 
 time_used_to_update = 0
+time_before_being_able_to_infect = 0.4  # Let's pretend that you can only infect people after this period of time (after having been infected) (in days)
 
 
 # --------------------  GLOBAL PARAMETERS (RETRIVED FROM FILE) --------------------
@@ -236,6 +237,7 @@ class Dot:
             if dot.is_infected
             and self.get_distance(dot.x, dot.y) < minimal_distance
             and self.id != dot.id
+            and self.infected_at + time_before_being_able_to_infect < time
         ]
 
         for dot in near_infected_dots_list:
@@ -412,16 +414,22 @@ class Dot:
         else:
             update_values_no_visual()
 
-        if auto_stop and len(
-            [dot for dot in dots if not dot.is_infected and not dot.has_been_infected]
-        ) == len(dots):
-            stop()
+        if auto_stop:
+            should_i_stop()
 
         time += time_step
         time_used_to_update += 1
 
 
-def stop() -> bool:
+def should_i_stop() -> None:
+    """Check if simulation should stop (if auto_stop is enabled only)
+    """
+    if len(
+            [dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]
+        ) == 0 and time > exposed_duration:
+            stop()
+
+def stop() -> None:
     """Stops the simulation"""
     write_logs()
     sys.exit(0)
