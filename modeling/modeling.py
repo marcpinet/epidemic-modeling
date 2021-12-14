@@ -422,12 +422,13 @@ class Dot:
 
 
 def should_i_stop() -> None:
-    """Check if simulation should stop (if auto_stop is enabled only)
-    """
-    if len(
-            [dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]
-        ) == 0 and time > exposed_duration:
-            stop()
+    """Check if simulation should stop (if auto_stop is enabled only)"""
+    if (
+        len([dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]) == 0
+        and time > exposed_duration
+    ):
+        stop()
+
 
 def stop() -> None:
     """Stops the simulation"""

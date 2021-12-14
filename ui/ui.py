@@ -31,7 +31,9 @@ class Ui_MainWindow(object):
         self.transmission_rate_slider.setProperty("value", 50)
         self.transmission_rate_slider.setOrientation(QtCore.Qt.Horizontal)
         self.transmission_rate_slider.setObjectName("transmission_rate_slider")
-        self.transmission_rate_slider.setToolTip("Chance of a dot to infect another dot")
+        self.transmission_rate_slider.setToolTip(
+            "Chance of a dot to infect another dot"
+        )
         self.mortality_rate_slider = QtWidgets.QSlider(self.centralwidget)
         self.mortality_rate_slider.setGeometry(QtCore.QRect(60, 150, 160, 22))
         self.mortality_rate_slider.setMaximum(1000)
@@ -39,7 +41,9 @@ class Ui_MainWindow(object):
         self.mortality_rate_slider.setProperty("value", 15)
         self.mortality_rate_slider.setOrientation(QtCore.Qt.Horizontal)
         self.mortality_rate_slider.setObjectName("mortality_rate_slider")
-        self.mortality_rate_slider.setToolTip("Chance of a dot to die (a value of 15 means, in percent, 1.5%)")
+        self.mortality_rate_slider.setToolTip(
+            "Chance of a dot to die (a value of 15 means, in percent, 1.5%)"
+        )
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(60, 130, 111, 16))
         self.label_2.setObjectName("label_2")
@@ -53,7 +57,9 @@ class Ui_MainWindow(object):
         self.time_to_recover_rate_slider.setProperty("value", 30)
         self.time_to_recover_rate_slider.setOrientation(QtCore.Qt.Horizontal)
         self.time_to_recover_rate_slider.setObjectName("time_to_recover_rate_slider")
-        self.time_to_recover_rate_slider.setToolTip("Time to recover from the disease (in days)")
+        self.time_to_recover_rate_slider.setToolTip(
+            "Time to recover from the disease (in days)"
+        )
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(60, 230, 121, 16))
         self.label_4.setObjectName("label_4")
@@ -66,7 +72,9 @@ class Ui_MainWindow(object):
         self.immunity_duration_rate_slider.setObjectName(
             "immunity_duration_rate_slider"
         )
-        self.immunity_duration_rate_slider.setToolTip("Immunity duration (in days), when you don't have symptoms anymore and you can't get the disease nor infect others")
+        self.immunity_duration_rate_slider.setToolTip(
+            "Immunity duration (in days), when you don't have symptoms anymore and you can't get the disease nor infect others"
+        )
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
         self.label_5.setGeometry(QtCore.QRect(300, 140, 111, 16))
         self.label_5.setObjectName("label_5")
@@ -89,7 +97,9 @@ class Ui_MainWindow(object):
         self.minimal_distance_slider.setProperty("value", 2)
         self.minimal_distance_slider.setOrientation(QtCore.Qt.Horizontal)
         self.minimal_distance_slider.setObjectName("minimal_distance_slider")
-        self.minimal_distance_slider.setToolTip("Minimal distance between two dots (according to what i've found, a dot measures approximately 0.8 unit")
+        self.minimal_distance_slider.setToolTip(
+            "Minimal distance between two dots (according to what i've found, a dot measures approximately 0.8 unit"
+        )
         self.dot_shaped_radio = QtWidgets.QRadioButton(self.centralwidget)
         self.dot_shaped_radio.setGeometry(QtCore.QRect(510, 270, 82, 17))
         self.dot_shaped_radio.setChecked(False)
@@ -146,7 +156,9 @@ class Ui_MainWindow(object):
         self.initial_infected_population_slider.setObjectName(
             "initial_infected_population_slider"
         )
-        self.initial_infected_population_slider.setToolTip("Number of infected individuals at the beginning of the simulation (they start as exposed)")
+        self.initial_infected_population_slider.setToolTip(
+            "Number of infected individuals at the beginning of the simulation (they start as exposed)"
+        )
         self.masked_dots_slider = QtWidgets.QSlider(self.centralwidget)
         self.masked_dots_slider.setGeometry(QtCore.QRect(300, 110, 160, 22))
         self.masked_dots_slider.setMinimum(0)
@@ -155,7 +167,9 @@ class Ui_MainWindow(object):
         self.masked_dots_slider.setProperty("value", 0)
         self.masked_dots_slider.setOrientation(QtCore.Qt.Horizontal)
         self.masked_dots_slider.setObjectName("masked_dots_slider")
-        self.masked_dots_slider.setToolTip("Number of dots that are wearing a mask at the beginning of the simulation")
+        self.masked_dots_slider.setToolTip(
+            "Number of dots that are wearing a mask at the beginning of the simulation"
+        )
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         self.label_9.setGeometry(QtCore.QRect(300, 90, 141, 16))
         self.label_9.setObjectName("label_9")
@@ -176,7 +190,9 @@ class Ui_MainWindow(object):
         self.incubation_slider.setProperty("value", 2)
         self.incubation_slider.setOrientation(QtCore.Qt.Horizontal)
         self.incubation_slider.setObjectName("incubation_slider")
-        self.incubation_slider.setToolTip("Number of days an individual is being in the exposed state")
+        self.incubation_slider.setToolTip(
+            "Number of days an individual is being in the exposed state"
+        )
         self.label_11 = QtWidgets.QLabel(self.centralwidget)
         self.label_11.setGeometry(QtCore.QRect(540, 80, 171, 16))
         self.label_11.setObjectName("label_11")
@@ -188,7 +204,9 @@ class Ui_MainWindow(object):
         self.simulation_speed_slider.setProperty("value", 20)
         self.simulation_speed_slider.setOrientation(QtCore.Qt.Horizontal)
         self.simulation_speed_slider.setObjectName("simulation_speed_slider")
-        self.simulation_speed_slider.setToolTip("Speed of the simulation (0: nothing happens, 100: SPEED)")
+        self.simulation_speed_slider.setToolTip(
+            "Speed of the simulation (0: nothing happens, 100: SPEED)"
+        )
         self.simulation_speed_val = QtWidgets.QLabel(self.centralwidget)
         self.simulation_speed_val.setGeometry(QtCore.QRect(510, 100, 18, 13))
         self.simulation_speed_val.setObjectName("simulation_speed_val")
@@ -196,7 +214,9 @@ class Ui_MainWindow(object):
         self.collision = QtWidgets.QCheckBox(self.centralwidget)
         self.collision.setGeometry(QtCore.QRect(510, 130, 201, 17))
         self.collision.setObjectName("collision")
-        self.collision.setToolTip("If checked, dots can collide with each other (very laggy above 250-300 dots), still in BETA")
+        self.collision.setToolTip(
+            "If checked, dots can collide with each other (very laggy above 250-300 dots), still in BETA"
+        )
         self.label_12 = QtWidgets.QLabel(self.centralwidget)
         self.label_12.setGeometry(QtCore.QRect(30, 40, 81, 16))
         self.label_12.setObjectName("label_12")
@@ -234,26 +254,36 @@ class Ui_MainWindow(object):
         self.dots_same_speed = QtWidgets.QCheckBox(self.centralwidget)
         self.dots_same_speed.setGeometry(QtCore.QRect(510, 160, 181, 17))
         self.dots_same_speed.setObjectName("dots_same_speed")
-        self.dots_same_speed.setToolTip("If checked, dots will travel at the same speed")
+        self.dots_same_speed.setToolTip(
+            "If checked, dots will travel at the same speed"
+        )
         self.infected_wear_mask = QtWidgets.QCheckBox(self.centralwidget)
         self.infected_wear_mask.setGeometry(QtCore.QRect(510, 190, 211, 17))
         self.infected_wear_mask.setObjectName("infected_wear_mask")
-        self.infected_wear_mask.setToolTip("If checked, infected will always wear a mask (once they're, and then if they weren't wearing a mask, they'll remove it, else they'll keep it)")
+        self.infected_wear_mask.setToolTip(
+            "If checked, infected will always wear a mask (once they're, and then if they weren't wearing a mask, they'll remove it, else they'll keep it)"
+        )
         self.infected_slowdown = QtWidgets.QCheckBox(self.centralwidget)
         self.infected_slowdown.setGeometry(QtCore.QRect(510, 220, 211, 17))
         self.infected_slowdown.setObjectName("infected_slowdown")
-        self.infected_slowdown.setToolTip("If checked, infected dots will slow down (they're travelling lessly)")
+        self.infected_slowdown.setToolTip(
+            "If checked, infected dots will slow down (they're travelling lessly)"
+        )
         self.people_travel_slower = QtWidgets.QCheckBox(self.centralwidget)
         self.people_travel_slower.setGeometry(QtCore.QRect(270, 240, 121, 17))
         self.people_travel_slower.setObjectName("people_travel_slower")
-        self.people_travel_slower.setToolTip("If checked, people will travel slower (and there is more chance to have more than 1 wave)")
+        self.people_travel_slower.setToolTip(
+            "If checked, people will travel slower (and there is more chance to have more than 1 wave)"
+        )
         self.label_15 = QtWidgets.QLabel(self.centralwidget)
         self.label_15.setGeometry(QtCore.QRect(270, 260, 121, 16))
         self.label_15.setObjectName("label_15")
         self.auto_stop = QtWidgets.QCheckBox(self.centralwidget)
         self.auto_stop.setGeometry(QtCore.QRect(560, 390, 70, 17))
         self.auto_stop.setObjectName("auto_stop")
-        self.auto_stop.setToolTip("If checked, the simulation will stop automatically when there are no more infected dots")
+        self.auto_stop.setToolTip(
+            "If checked, the simulation will stop automatically when there are no more infected dots"
+        )
         self.auto_stop.setChecked(True)
         self.visual = QtWidgets.QCheckBox(self.centralwidget)
         self.visual.setGeometry(QtCore.QRect(480, 390, 70, 17))
@@ -273,9 +303,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "Transmission rate (%)"))
         self.label_2.setText(_translate("MainWindow", "Mortality rate (‰)"))
-        self.label_3.setText(
-            _translate("MainWindow", "Time Before Recovering (days)")
-        )
+        self.label_3.setText(_translate("MainWindow", "Time Before Recovering (days)"))
         self.label_4.setText(_translate("MainWindow", "Immunity duration (days)"))
         self.label_5.setText(_translate("MainWindow", "Population size"))
         self.label_6.setText(
