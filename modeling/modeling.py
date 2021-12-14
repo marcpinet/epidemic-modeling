@@ -67,8 +67,6 @@ transmission_rate_masked = (
     transmission_rate * 0.2
 )  # Chance of a masked dot to be infected and to infect a healthy dot
 
-rounded_sim_speed = math.floor(simulation_speed)
-
 mortality_rate = (
     int(parameters[1]) / 1000 / infected_duration
 )  # Chance of a dot to die per tick
@@ -369,7 +367,7 @@ class Dot:
         if (
             not self.is_only_exposed()
             and self.is_infected
-            and random() < mortality_rate
+            and random() <= mortality_rate
         ):
             self.kill()
 
