@@ -1,6 +1,5 @@
 import os
 
-
 def suppress_qt_warnings():
     os.environ["QT_DEVICE_PIXEL_RATIO"] = "0"
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
@@ -22,7 +21,7 @@ if __name__ == "__main__":
     print("Select the settings you want for the simulation...")
     os.system("python ui\\ui.py")
     print("Simulating...")
-    os.system("python math\\modeling.py files\\config.txt")
+    os.system("python modeling\\modeling.py files\\config.txt")
     print("Generating plot...")
-    os.system("python math\\graph.py files\\logs.txt")
+    os.system("python modeling\\graph.py files\\logs.txt")
     print("Done!")
