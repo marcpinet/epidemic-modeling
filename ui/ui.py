@@ -44,13 +44,13 @@ class Ui_MainWindow(object):
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setGeometry(QtCore.QRect(60, 180, 161, 16))
         self.label_3.setObjectName("label_3")
-        self.time_to_cure_rate_slider = QtWidgets.QSlider(self.centralwidget)
-        self.time_to_cure_rate_slider.setGeometry(QtCore.QRect(60, 200, 160, 22))
-        self.time_to_cure_rate_slider.setMaximum(50)
-        self.time_to_cure_rate_slider.setSingleStep(1)
-        self.time_to_cure_rate_slider.setProperty("value", 30)
-        self.time_to_cure_rate_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.time_to_cure_rate_slider.setObjectName("time_to_cure_rate_slider")
+        self.time_to_recover_rate_slider = QtWidgets.QSlider(self.centralwidget)
+        self.time_to_recover_rate_slider.setGeometry(QtCore.QRect(60, 200, 160, 22))
+        self.time_to_recover_rate_slider.setMaximum(50)
+        self.time_to_recover_rate_slider.setSingleStep(1)
+        self.time_to_recover_rate_slider.setProperty("value", 30)
+        self.time_to_recover_rate_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.time_to_recover_rate_slider.setObjectName("time_to_recover_rate_slider")
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(60, 230, 121, 16))
         self.label_4.setObjectName("label_4")
@@ -104,9 +104,9 @@ class Ui_MainWindow(object):
         self.mortality_val = QtWidgets.QLabel(self.centralwidget)
         self.mortality_val.setGeometry(QtCore.QRect(30, 150, 31, 16))
         self.mortality_val.setObjectName("mortality_val")
-        self.cure_val = QtWidgets.QLabel(self.centralwidget)
-        self.cure_val.setGeometry(QtCore.QRect(30, 200, 21, 16))
-        self.cure_val.setObjectName("cure_val")
+        self.recovered_val = QtWidgets.QLabel(self.centralwidget)
+        self.recovered_val.setGeometry(QtCore.QRect(30, 200, 21, 16))
+        self.recovered_val.setObjectName("recovered_val")
         self.immunity_val = QtWidgets.QLabel(self.centralwidget)
         self.immunity_val.setGeometry(QtCore.QRect(30, 250, 21, 16))
         self.immunity_val.setObjectName("immunity_val")
@@ -122,7 +122,7 @@ class Ui_MainWindow(object):
         self.initial_infected_val = QtWidgets.QLabel(self.centralwidget)
         self.initial_infected_val.setGeometry(QtCore.QRect(30, 350, 21, 16))
         self.initial_infected_val.setObjectName("initial_infected_val")
-        self.initial_infected_val.setProperty("vazlue", 0)
+        self.initial_infected_val.setProperty("value", 0)
         self.initial_infected_population_slider = QtWidgets.QSlider(self.centralwidget)
         self.initial_infected_population_slider.setGeometry(
             QtCore.QRect(60, 350, 160, 22)
@@ -253,7 +253,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Transmission rate (%)"))
         self.label_2.setText(_translate("MainWindow", "Mortality rate (‰)"))
         self.label_3.setText(
-            _translate("MainWindow", "Time Before Being Immune (days)")
+            _translate("MainWindow", "Time Before Recovering (days)")
         )
         self.label_4.setText(_translate("MainWindow", "Immunity duration (days)"))
         self.label_5.setText(_translate("MainWindow", "Population size"))
@@ -272,8 +272,8 @@ class Ui_MainWindow(object):
         self.mortality_val.setText(
             _translate("MainWindow", str(self.mortality_rate_slider.value()))
         )
-        self.cure_val.setText(
-            _translate("MainWindow", str(self.time_to_cure_rate_slider.value()))
+        self.recovered_val.setText(
+            _translate("MainWindow", str(self.time_to_recover_rate_slider.value()))
         )
         self.immunity_val.setText(
             _translate("MainWindow", str(self.immunity_duration_rate_slider.value()))
@@ -320,7 +320,7 @@ class Ui_MainWindow(object):
         # Everything here is to connect button and sliders to methods
         self.transmission_rate_slider.valueChanged.connect(self.transmission_val.setNum)
         self.mortality_rate_slider.valueChanged.connect(self.mortality_val.setNum)
-        self.time_to_cure_rate_slider.valueChanged.connect(self.cure_val.setNum)
+        self.time_to_recover_rate_slider.valueChanged.connect(self.recovered_val.setNum)
         self.immunity_duration_rate_slider.valueChanged.connect(
             self.immunity_val.setNum
         )
@@ -372,7 +372,7 @@ class Ui_MainWindow(object):
         with open(config_path, "a") as f:
             f.write(self.transmission_val.text() + "\n")
             f.write(self.mortality_val.text() + "\n")
-            f.write(self.cure_val.text() + "\n")
+            f.write(self.recovered_val.text() + "\n")
             f.write(self.immunity_val.text() + "\n")
             f.write(self.dots_nb_val.text() + "\n")
             f.write(self.distance_val.text() + "\n")
