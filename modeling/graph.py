@@ -60,7 +60,9 @@ def create(file):
     # plt.plot(time, recovered_smooth, label="Recovered", color="blue")
 
     # Setting up graphic title and legend properties
-    plt.title(label="Epidemic modeling", loc="center")
+    plt.title(label="SEIDR Simulation results", loc="center")
+    plt.xlabel("Time (days)")
+    plt.ylabel("SEIDR Populations")
     plt.legend(loc="right")
     plt.pause(0.001)
 
