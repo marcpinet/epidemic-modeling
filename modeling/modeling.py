@@ -649,7 +649,7 @@ def main() -> None:
 
     if visual:
         # Graph initialization
-        figure_dots = plt.figure(facecolor="white", figsize=(8, 6))
+        figure_dots = plt.figure(facecolor="white", figsize=(8.5, 6))
         dots_area = plt.axes(xlim=(0, HEIGHT_WIDTH), ylim=(0, HEIGHT_WIDTH))
 
         # Differentiating dots between each others
