@@ -44,9 +44,7 @@ simulation_speed = float(parameters[10])
 time_step = simulation_speed / 100  # Time step for the simulation
 sim_values_over_time = []
 
-transmission_rate = (
-    int(parameters[0]) / 100
-)  # Chance of a dot to be infected
+transmission_rate = int(parameters[0]) / 100  # Chance of a dot to be infected
 
 infected_duration = int(
     parameters[2]
