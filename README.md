@@ -19,7 +19,7 @@
 * Humans can wear a mask and mask are 80% effective 🧢
 * Humans wearing a mask are represented by a "+" and do not easily infect as well as being harder to infect ⛑️
 * The simulation is almost fully randomized but keeps logic with given values 🎲
-* You can adjust the speed simulation with the slider 🏃
+* You can adjust the speed of the simulation with the slider 🏃
 * You can tweak some specific parameters of the simulation 🧰
 * At the end of the simulation, you can see the evolution of the population through time 📊
 * ... and many more! 🎯
