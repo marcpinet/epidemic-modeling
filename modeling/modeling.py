@@ -376,7 +376,7 @@ class Dot:
         for dot in dots:
             dot.move()
 
-            # When a day passed (yes, this is the only way I could find, but it works and I think it's pretty good)
+            # When a day passed, update the state of the dots (at the end of the day, so before next day)
             if math.floor(time + time_step) == math.floor(time) + 1:
                 dot.update_state()
                 time_used_to_update = 0
