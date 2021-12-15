@@ -369,19 +369,20 @@ class Dot:
             dots (list): List of Dot objects
         """
         global time
+        end_of_day = math.floor(time + time_step) == math.floor(time) + 1
 
         for dot in dots:
             dot.move()
 
             # When a day passed, update the state of the dots (at the end of the day, so before next day)
-            if math.floor(time + time_step) == math.floor(time) + 1:
+            if end_of_day:
                 dot.update_state()
+
+        if end_of_day:
+            update_values()
 
         if visual:
             update_data()
-            update_values()
-        else:
-            update_values_no_visual()
 
         if auto_stop:
             should_i_stop()
@@ -418,35 +419,6 @@ def show_data(
     )
 
 
-def update_values_no_visual() -> None:
-    """Updates the values of the file"""
-    number_of_susceptible_dots = len(Dot.get_all_susceptible())
-    number_of_infected_dots = len(Dot.get_all_infected())
-    number_of_recovered_dots = len(Dot.get_all_recovered())
-    number_of_exposed_dots = len(Dot.get_all_exposed())
-    number_of_dead_dots = len(dead_dots_list)
-
-    sim_values_over_time.append(
-        [
-            number_of_susceptible_dots,
-            number_of_infected_dots,
-            number_of_recovered_dots,
-            number_of_exposed_dots,
-            number_of_dead_dots,
-            time,
-        ]
-    )
-
-    show_data(
-        number_of_susceptible_dots,
-        number_of_infected_dots,
-        number_of_recovered_dots,
-        number_of_exposed_dots,
-        number_of_dead_dots,
-        time,
-    )
-
-
 def update_values() -> None:
     """Updates the values of the plot counters"""
     number_of_susceptible_dots = len(Dot.get_all_susceptible())
@@ -455,14 +427,15 @@ def update_values() -> None:
     number_of_exposed_dots = len(Dot.get_all_exposed())
     number_of_dead_dots = len(dead_dots_list)
 
-    dots_area.set_title(
-        f"Susceptible: {number_of_susceptible_dots}"
-        + f"   |   Exposed: {number_of_exposed_dots}"
-        + f"   |   Infected: {number_of_infected_dots}"
-        + f"   |   Recovered: {number_of_recovered_dots}"
-        + f"   |   Dead: {number_of_dead_dots}"
-        + f"   |   Days: {round(time)}"
-    )
+    if visual:
+        dots_area.set_title(
+            f"Susceptible: {number_of_susceptible_dots}"
+            + f"   |   Exposed: {number_of_exposed_dots}"
+            + f"   |   Infected: {number_of_infected_dots}"
+            + f"   |   Recovered: {number_of_recovered_dots}"
+            + f"   |   Dead: {number_of_dead_dots}"
+            + f"   |   Days: {round(time)}"
+        )
 
     sim_values_over_time.append(
         [
@@ -474,6 +447,16 @@ def update_values() -> None:
             time,
         ]
     )
+
+    if not visual:
+        show_data(
+            number_of_susceptible_dots,
+            number_of_infected_dots,
+            number_of_recovered_dots,
+            number_of_exposed_dots,
+            number_of_dead_dots,
+            time,
+        )
 
 
 def update_data() -> None:
