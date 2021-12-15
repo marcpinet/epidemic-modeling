@@ -240,7 +240,7 @@ class Dot:
 
         # But dots who wear a mask also have this chance to infect the dot. (+ see line 345)
         for dot in near_infected_dots_list:
-            if (dot.wears_mask and random() < transmission_rate_masked) or not dot.wears_mask:
+            if (dot.wears_mask and random() < transmission_rate_masked) or (not dot.wears_mask and random() < transmission_rate):
                 self.become_infected()
                 break
 
@@ -343,7 +343,7 @@ class Dot:
         # So a dot has this chance to be infected by another dot... (+ see line 241)
         if (not self.is_recovering and not self.is_infected) and (
             (self.wears_mask and random() < transmission_rate_masked)
-            or (not self.wears_mask and random() < transmission_rate)
+            or not self.wears_mask
         ):
             self.try_infect()
 
