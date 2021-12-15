@@ -15,7 +15,7 @@
 ## Features
 
 * Every parameters of the simulation is editable through an interactive GUI 🖥
-* Humans are moving randomly but logically and are represented by dots 👦
+* Humans are travelling randomly but logically and are represented by dots 👦
 * Humans can wear a mask and mask are 80% effective 🧢
 * Humans wearing a mask are represented by a "+" and do not easily infect as well as being harder to infect ⛑️
 * The simulation is almost fully randomized but keeps logic with given values 🎲
@@ -28,14 +28,15 @@
 
 ### One wave of the epidemic was simulated
 
-https://user-images.githubusercontent.com/52708150/145208365-adcee61b-56a5-4ba5-81cf-75e5ef543743.mp4
+https://user-images.githubusercontent.com/52708150/146152897-48de8e98-add0-4ddb-9def-318042f37b66.mp4
 
-### Three waves of the epidemic were simulated
+### Two waves of the epidemic were simulated
 
-https://user-images.githubusercontent.com/52708150/145208362-3c5b83fc-4aad-413e-8f34-2a65b520413e.mp4
+https://user-images.githubusercontent.com/52708150/146154040-d543cac3-7672-4328-99e9-c2b0a3dcca23.mp4
+
 ### Masked dots example
 
-https://user-images.githubusercontent.com/52708150/145208356-1e540f3a-dfaa-4879-b820-f5f1fd648a2a.mp4
+https://user-images.githubusercontent.com/52708150/146152957-4bdeea60-68b6-4db7-bc41-72de353d2016.mp4
 
 ### Support 👨‍💻
 

@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
         self.number_of_dots_slider.setMaximum(500)
         self.number_of_dots_slider.setMinimum(1)
         self.number_of_dots_slider.setSingleStep(1)
-        self.number_of_dots_slider.setProperty("value", 100)
+        self.number_of_dots_slider.setProperty("value", 500)
         self.number_of_dots_slider.setOrientation(QtCore.Qt.Horizontal)
         self.number_of_dots_slider.setObjectName("number_of_dots_slider")
         self.number_of_dots_slider.setToolTip("Number of individuals in the population")
