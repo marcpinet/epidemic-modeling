@@ -187,7 +187,7 @@ class Ui_MainWindow(object):
         self.incubation_slider.setGeometry(QtCore.QRect(60, 300, 160, 22))
         self.incubation_slider.setMaximum(20)
         self.incubation_slider.setSingleStep(0)
-        self.incubation_slider.setProperty("value", 2)
+        self.incubation_slider.setProperty("value", 5)
         self.incubation_slider.setOrientation(QtCore.Qt.Horizontal)
         self.incubation_slider.setObjectName("incubation_slider")
         self.incubation_slider.setToolTip(

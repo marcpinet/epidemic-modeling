@@ -46,18 +46,18 @@ def create(file):
     # Setting up plots
 
     # Not smoothed
-    plt.plot(time, susceptible, color="green", label="Susceptible")
-    plt.plot(time, exposed, color="magenta", label="Exposed")
-    plt.plot(time, infected, color="red", label="Infected")
-    plt.plot(time, dead, color="black", label="Dead")
-    plt.plot(time, recovered, color="blue", label="Recovered")
+    plt.plot(time, susceptible, "-", color="green", label="Susceptible")
+    plt.plot(time, exposed, "-", color="magenta", label="Exposed")
+    plt.plot(time, infected, "-", color="red", label="Infected")
+    plt.plot(time, dead, "-", color="black", label="Dead")
+    plt.plot(time, recovered, "-", color="blue", label="Recovered")
 
     # Smoothed
-    plt.plot(time, susceptible_smooth, "--", label="Susceptible", color="green")
-    plt.plot(time, exposed_smooth, "--", label="Exposed", color="magenta")
-    plt.plot(time, infected_smooth, "--", label="Infected", color="red")
-    plt.plot(time, dead_smooth, "--", label="Dead", color="black")
-    plt.plot(time, recovered_smooth, "--", label="Recovered", color="blue")
+    plt.plot(time, susceptible_smooth, "--", label="_nolegend_", color="green")
+    plt.plot(time, exposed_smooth, "--", label="_nolegend_", color="magenta")
+    plt.plot(time, infected_smooth, "--", label="_nolegend_", color="red")
+    plt.plot(time, dead_smooth, "--", label="_nolegend_", color="black")
+    plt.plot(time, recovered_smooth, "--", label="_nolegend_", color="blue")
 
     # Setting up graphic title and legend properties
     plt.title(label="SEIDR Simulation results", loc="center")
