@@ -63,7 +63,7 @@ maskedShape = "P"
 # For masked population
 transmission_rate_masked = (
     transmission_rate * 0.2
-)  # Chance of a masked dot to be infected and to infect a susceptible dot
+)  # Chance of a masked dot to be infected AND to infect a susceptible dot
 
 mortality_rate = (
     int(parameters[1]) / 1000 / infected_duration
@@ -238,7 +238,7 @@ class Dot:
             and self.infected_at + time_before_being_able_to_infect < time
         ]
 
-        # But dots also have this chance to infect the dot. (+ see line 345)
+        # But dots who wear a mask also have this chance to infect the dot. (+ see line 345)
         for dot in near_infected_dots_list:
             if (dot.wears_mask and random() < transmission_rate_masked) or not dot.wears_mask:
                 self.become_infected()
