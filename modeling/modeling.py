@@ -302,33 +302,6 @@ class Dot:
             self.y = BORDER_MIN
             self.vely *= -1
 
-    # This method isn't used in the code. Feel free to use it instead of the current move method.
-    def anarchic_move(self) -> None:
-        """Moves the dot and makes sure they don't go out of the area or touch each other. They've 4% chance to change direction."""
-        self.x += self.velx
-        self.y += self.vely
-        if random() > 0.96:
-            # Change 2 to lower value to make the dots go faster
-            self.velx = (random() - 0.5) / (1 / (time_step + 1))
-            # Change 2 to lower value to make the dots go faster
-            self.vely = (random() - 0.5) / (1 / (time_step + 1))
-
-        if self.x >= BORDER_MAX:
-            self.x = BORDER_MAX
-            self.velx *= -1
-
-        if self.x <= BORDER_MIN:
-            self.x = BORDER_MIN
-            self.velx *= -1
-
-        if self.y >= BORDER_MAX:
-            self.y = BORDER_MAX
-            self.vely *= -1
-
-        if self.y <= BORDER_MIN:
-            self.y = BORDER_MIN
-            self.vely *= -1
-
     def become_infected(self) -> None:
         """Infects the dot"""
         self.is_infected = True
