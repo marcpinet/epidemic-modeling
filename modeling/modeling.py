@@ -134,7 +134,7 @@ class Dot:
 
     @staticmethod
     def init_checker(x: float, y: float, already_used_coords: list) -> bool:
-        """Checks if the dot is in a distance of a minimal_distance from another dot
+        """Checks if the dot is in a distance of the dots_spawn_spacing_constant from another dot
 
         Args:
             x (float): abscissa of the first dot
