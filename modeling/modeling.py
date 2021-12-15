@@ -245,7 +245,6 @@ class Dot:
             ) or not dot.wears_mask:
                 self.become_infected()
                 break
-            break
 
     def handle_collisions(self) -> None:
         """Handles collisions between dots"""
