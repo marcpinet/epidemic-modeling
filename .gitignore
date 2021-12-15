@@ -138,3 +138,4 @@ dmypy.json
 
 # Release folder
 release/
+release_creator.bat
