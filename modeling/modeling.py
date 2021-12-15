@@ -235,7 +235,6 @@ class Dot:
             for dot in dots
             if dot.is_infected
             and self.get_distance(dot.x, dot.y) < minimal_distance
-            and self.id != dot.id
             and self.infected_at + time_before_being_able_to_infect < time
         ]
 
