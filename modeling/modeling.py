@@ -116,7 +116,7 @@ class Dot:
             x (int): abscissa of the dot
             y (int): ordinate of the dot
         """
-        self.id = 0
+        self.id = 0  # Used to optimize collisions
         self.x = x
         self.y = y
         self.velx = (random() - 0.5) / 5
