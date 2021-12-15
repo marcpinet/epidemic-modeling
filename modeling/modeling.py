@@ -224,7 +224,7 @@ class Dot:
         """
         return [dot for dot in dots if dot.has_been_infected]
 
-    def is_only_exposed(self):
+    def is_only_exposed(self) -> None:
         """Returns true if the dot is asymptomatic, else return false"""
         return self.is_infected and self.infected_at + exposed_duration > time
 
@@ -239,9 +239,9 @@ class Dot:
         ]
 
         for dot in near_infected_dots_list:
-            if (
-                dot.wears_mask and random() < transmission_rate_masked
-            ) or not dot.wears_mask:
+            if (dot.wears_mask and random() < transmission_rate_masked) or (
+                not dot.wears_mask and random() < transmission_rate
+            ):
                 self.become_infected()
                 break
 
@@ -341,10 +341,7 @@ class Dot:
         ):
             self.kill()
 
-        if (not self.has_been_infected and not self.is_infected) and (
-            (self.wears_mask and random() < transmission_rate_masked)
-            or (not self.wears_mask and random() < transmission_rate)
-        ):
+        if not self.has_been_infected and not self.is_infected:
             self.try_infect()
 
         if (
