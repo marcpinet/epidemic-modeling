@@ -53,11 +53,11 @@ def create(file):
     plt.plot(time, recovered, color="blue", label="Recovered")
 
     # Smoothed
-    # plt.plot(time, susceptible_smooth, label="Susceptible", color="green")
-    # plt.plot(time, exposed_smooth, label="Exposed", color="magenta")
-    # plt.plot(time, infected_smooth, label="Infected", color="red")
-    # plt.plot(time, dead_smooth, label="Dead", color="black")
-    # plt.plot(time, recovered_smooth, label="Recovered", color="blue")
+    plt.plot(time, susceptible_smooth, "--", label="Susceptible", color="green")
+    plt.plot(time, exposed_smooth, "--", label="Exposed", color="magenta")
+    plt.plot(time, infected_smooth, "--", label="Infected", color="red")
+    plt.plot(time, dead_smooth, "--", label="Dead", color="black")
+    plt.plot(time, recovered_smooth, "--", label="Recovered", color="blue")
 
     # Setting up graphic title and legend properties
     plt.title(label="SEIDR Simulation results", loc="center")
