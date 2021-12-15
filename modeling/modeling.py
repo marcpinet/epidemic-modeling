@@ -123,7 +123,7 @@ class Dot:
         self.vely = (random() - 0.5) / 5
         self.is_infected = False
         self.infected_at = -1
-        self.has_been_infected = False
+        self.is_recovering = False
         self.recovered_at = -1
         self.wears_mask = False
         self.was_originally_wearing_mask = False
@@ -194,7 +194,7 @@ class Dot:
             list: list of susceptible dots
         """
         return [
-            dot for dot in dots if not dot.is_infected and not dot.has_been_infected
+            dot for dot in dots if not dot.is_infected and not dot.is_recovering
         ]
 
     @staticmethod
@@ -222,7 +222,7 @@ class Dot:
         Returns:
             list: list of recovered dots
         """
-        return [dot for dot in dots if dot.has_been_infected]
+        return [dot for dot in dots if dot.is_recovering]
 
     def is_only_exposed(self) -> None:
         """Returns true if the dot is asymptomatic, else return false"""
@@ -238,6 +238,7 @@ class Dot:
             and self.infected_at + time_before_being_able_to_infect < time
         ]
 
+        # But dots also have this chance to infect the dot. (+ see line 345)
         for dot in near_infected_dots_list:
             if (dot.wears_mask and random() < transmission_rate_masked) or (
                 not dot.wears_mask and random() < transmission_rate
@@ -319,7 +320,7 @@ class Dot:
     def become_recovered(self) -> None:
         """Makes the dot recovered"""
         self.is_infected = False
-        self.has_been_infected = True
+        self.is_recovering = True
         self.recovered_at = time
         self.movement.speed_back_to_normal()
 
@@ -328,7 +329,7 @@ class Dot:
 
     def become_susceptible(self) -> None:
         """Makes the dot susceptible"""
-        self.has_been_infected = False
+        self.is_recovering = False
         self.infected_at = -1
         self.recovered_at = -1
 
@@ -341,7 +342,11 @@ class Dot:
         ):
             self.kill()
 
-        if not self.has_been_infected and not self.is_infected:
+        # So a dot has this chance to be infected by another dot... (+ see line 241)
+        if (not self.is_recovering and not self.is_infected) and (
+            (self.wears_mask and random() < transmission_rate_masked)
+            or (not self.wears_mask and random() < transmission_rate)
+        ):
             self.try_infect()
 
         if (
@@ -352,7 +357,7 @@ class Dot:
             self.become_recovered()
 
         if (
-            self.has_been_infected
+            self.is_recovering
             and self.recovered_at != -1
             and self.recovered_at + immunity_duration < time
         ):
