@@ -49,7 +49,7 @@ I am a [Brave Verified Creator](https://i.imgur.com/fOUfdM5.png)!
 
 ### Prerequisites
 
-* Python 3.9+ (3.0+ might work)
+* Python 3.7.0+
 
 Get a copy of the Project. Assuming you have git installed, open your Terminal and enter:
 
