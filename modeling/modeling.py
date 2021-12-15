@@ -19,7 +19,6 @@ BORDER_MAX = HEIGHT_WIDTH - 1  # maximum distance from the border
 time = 0  # Time to initialize
 dots_spawn_spacing_constant = 2  # Spacing between dots when they spawn
 
-time_used_to_update = 0
 time_before_being_able_to_infect = 0.4  # Let's pretend that you can only infect people after this period of time (after having been infected) (in days)
 
 
@@ -371,7 +370,7 @@ class Dot:
         Args:
             dots (list): List of Dot objects
         """
-        global time, time_used_to_update
+        global time
 
         for dot in dots:
             dot.move()
@@ -379,7 +378,6 @@ class Dot:
             # When a day passed, update the state of the dots (at the end of the day, so before next day)
             if math.floor(time + time_step) == math.floor(time) + 1:
                 dot.update_state()
-                time_used_to_update = 0
 
         if visual:
             update_data()
@@ -391,7 +389,6 @@ class Dot:
             should_i_stop()
 
         time += time_step
-        time_used_to_update += 1
 
 
 def should_i_stop() -> None:
