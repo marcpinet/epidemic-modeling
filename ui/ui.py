@@ -300,7 +300,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Epidemic Modeling"))
         self.label.setText(_translate("MainWindow", "Transmission rate (%)"))
         self.label_2.setText(_translate("MainWindow", "Mortality rate (‰)"))
         self.label_3.setText(_translate("MainWindow", "Time Before Recovering (days)"))
