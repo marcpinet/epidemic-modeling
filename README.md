@@ -30,7 +30,7 @@
 
 https://user-images.githubusercontent.com/52708150/146844598-e74a4185-b21d-40bf-9046-5e6e4423ef77.mp4
 
-### Two waves of the epidemic were simulated
+### Three waves of the epidemic were simulated
 
 https://user-images.githubusercontent.com/52708150/146844606-71d78f0f-11e3-47e2-8330-953a9d3600f4.mp4
 
