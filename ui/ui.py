@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.transmission_rate_slider.setGeometry(QtCore.QRect(60, 100, 160, 22))
         self.transmission_rate_slider.setMaximum(100)
         self.transmission_rate_slider.setSingleStep(1)
-        self.transmission_rate_slider.setProperty("value", 90)
+        self.transmission_rate_slider.setProperty("value", 50)
         self.transmission_rate_slider.setOrientation(QtCore.Qt.Horizontal)
         self.transmission_rate_slider.setObjectName("transmission_rate_slider")
         self.transmission_rate_slider.setToolTip(
