@@ -66,7 +66,7 @@ def create(file):
     plt.legend(loc="right")
     x = time[round((len(time) - 1) / 2)]
     pop = susceptible[-1] + infected[-1] + recovered[-1] + exposed[-1] + dead[-1]
-    y = pop - (pop/10)
+    y = pop - (pop / 10)
     plt.text(x, y, "Deadly toll: " + str(dead[-1]) + " deaths")
     plt.pause(0.001)
 

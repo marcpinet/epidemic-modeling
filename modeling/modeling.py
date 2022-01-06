@@ -61,12 +61,12 @@ shape = parameters[9]  # tip: use '.' instead if you put a value < 3 in minimal_
 maskedShape = "P"
 
 # For masked population
-transmission_rate_masked = (
-    transmission_rate * (1/3)
+transmission_rate_masked = transmission_rate * (
+    1 / 3
 )  # Chance of a masked dot to be infected
 
-transmission_rate_masked_emit = (
-    transmission_rate * (1/18)
+transmission_rate_masked_emit = transmission_rate * (
+    1 / 18
 )  # Chance of a masked dot to infect a susceptible dot
 
 mortality_rate = (
@@ -197,9 +197,7 @@ class Dot:
         Returns:
             list: list of susceptible dots
         """
-        return [
-            dot for dot in dots if not dot.is_infected and not dot.is_recovering
-        ]
+        return [dot for dot in dots if not dot.is_infected and not dot.is_recovering]
 
     @staticmethod
     def get_all_exposed() -> list:
@@ -244,7 +242,9 @@ class Dot:
 
         # See this french schema: https://i.imgur.com/eUfUeC0.png and https://media.discordapp.net/attachments/462181688257282058/923173582090162206/20211222_122201.jpg
         for dot in near_infected_dots_list:
-            if (dot.wears_mask and random() < transmission_rate_masked_emit) or (not dot.wears_mask and random() < transmission_rate):
+            if (dot.wears_mask and random() < transmission_rate_masked_emit) or (
+                not dot.wears_mask and random() < transmission_rate
+            ):
                 self.become_infected()
                 break
 
