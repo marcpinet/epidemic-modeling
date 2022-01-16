@@ -310,9 +310,6 @@ class Dot:
         if infected_slowdown:
             self.movement.speed *= 0.5  # Reduce speed by 50%
 
-        if infected_wear_mask and not self.is_only_exposed():
-            self.wears_mask = True
-
     def kill(self) -> None:
         """Kills the dot"""
         global dead_dots_list
@@ -337,6 +334,15 @@ class Dot:
 
     def update_state(self) -> None:
         """Updates the state of the dot"""
+
+        if (
+            infected_wear_mask
+            and not self.wears_mask
+            and not self.is_only_exposed()
+            and self.is_infected
+        ):
+            self.wears_mask = True
+
         if (
             not self.is_only_exposed()
             and self.is_infected
