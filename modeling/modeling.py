@@ -446,6 +446,16 @@ def update_values() -> None:
             + f"   |   Dead: {number_of_dead_dots}"
             + f"   |   Days: {round(time)}"
         )
+        
+    else:
+        show_data(
+            number_of_susceptible_dots,
+            number_of_infected_dots,
+            number_of_recovered_dots,
+            number_of_exposed_dots,
+            number_of_dead_dots,
+            time,
+        )
 
     sim_values_over_time.append(
         [
@@ -457,16 +467,6 @@ def update_values() -> None:
             time,
         ]
     )
-
-    if not visual:
-        show_data(
-            number_of_susceptible_dots,
-            number_of_infected_dots,
-            number_of_recovered_dots,
-            number_of_exposed_dots,
-            number_of_dead_dots,
-            time,
-        )
 
 
 def update_data() -> None:
