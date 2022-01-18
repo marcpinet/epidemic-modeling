@@ -54,7 +54,7 @@ class Ui_MainWindow(object):
         self.time_to_recover_rate_slider.setGeometry(QtCore.QRect(60, 200, 160, 22))
         self.time_to_recover_rate_slider.setMaximum(50)
         self.time_to_recover_rate_slider.setSingleStep(1)
-        self.time_to_recover_rate_slider.setProperty("value", 30)
+        self.time_to_recover_rate_slider.setProperty("value", 15)
         self.time_to_recover_rate_slider.setOrientation(QtCore.Qt.Horizontal)
         self.time_to_recover_rate_slider.setObjectName("time_to_recover_rate_slider")
         self.time_to_recover_rate_slider.setToolTip(
@@ -201,7 +201,7 @@ class Ui_MainWindow(object):
         self.simulation_speed_slider.setMinimum(2)
         self.simulation_speed_slider.setMaximum(100)
         self.simulation_speed_slider.setSingleStep(1)
-        self.simulation_speed_slider.setProperty("value", 20)
+        self.simulation_speed_slider.setProperty("value", 15)
         self.simulation_speed_slider.setOrientation(QtCore.Qt.Horizontal)
         self.simulation_speed_slider.setObjectName("simulation_speed_slider")
         self.simulation_speed_slider.setToolTip(
@@ -210,7 +210,7 @@ class Ui_MainWindow(object):
         self.simulation_speed_val = QtWidgets.QLabel(self.centralwidget)
         self.simulation_speed_val.setGeometry(QtCore.QRect(510, 100, 18, 13))
         self.simulation_speed_val.setObjectName("simulation_speed_val")
-        self.simulation_speed_val.setProperty("value", 20)
+        self.simulation_speed_val.setProperty("value", 15)
         self.collision = QtWidgets.QCheckBox(self.centralwidget)
         self.collision.setGeometry(QtCore.QRect(510, 130, 201, 17))
         self.collision.setObjectName("collision")
@@ -342,7 +342,7 @@ class Ui_MainWindow(object):
         )
         self.label_10.setText(_translate("MainWindow", "Incubation time (days)"))
         self.label_11.setText(_translate("MainWindow", "Simulation speed"))
-        self.simulation_speed_val.setText(_translate("MainWindow", "20"))
+        self.simulation_speed_val.setText(_translate("MainWindow", "15"))
         self.collision.setText(
             _translate("MainWindow", "Dots can collide between each other")
         )
