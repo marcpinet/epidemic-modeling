@@ -218,6 +218,14 @@ class Dot:
         return [dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]
 
     @staticmethod
+    def get_all_exposed_and_infected():
+        """Gets all exposed and infected dots
+
+        Returns:
+            list: list of exposed and infected dots
+        """
+        return [dot for dot in dots if dot.is_infected]
+    @staticmethod
     def get_all_recovered() -> list:
         """Gets all the recovered dots
 
@@ -402,10 +410,7 @@ class Dot:
 
 def should_i_stop() -> None:
     """Check if simulation should stop (if auto_stop is enabled only)"""
-    if (
-        len([dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]) == 0
-        and time > exposed_duration
-    ):
+    if len(Dot.get_all_exposed_and_infected()) == 0 and time > exposed_duration:
         stop()
 
 
