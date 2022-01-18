@@ -96,11 +96,11 @@ class Movement:
         self.chance_to_change_direction = uniform(0.85, 1)
         self.angle = uniform(0, 50)
 
-        reduction_factor = 100 if not people_travel_slower else simulation_speed * 20
+        reduction_factor = 100 if not people_travel_slower else simulation_speed
 
         self.initial_speed = (
             np.random.normal(
-                loc=simulation_speed / reduction_factor, scale=100 / reduction_factor
+                loc=simulation_speed / reduction_factor, scale=200 / reduction_factor
             )
             if not dots_same_speed
             else simulation_speed / reduction_factor
