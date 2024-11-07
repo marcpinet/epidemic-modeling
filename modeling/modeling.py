@@ -1,736 +1,474 @@
-# -------------------- IMPORTS --------------------
-
-
-from random import randint, random, uniform
-from matplotlib import pyplot as plt, animation as anim
-from matplotlib.widgets import Button
-import math
-import sys
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Button
+import sys
+from random import uniform
+
+class SimulationConfig:
+    """Configuration parameters for the SEIDR simulation."""
+    
+    def __init__(self, config_file: str):
+        """Initialize simulation parameters from config file."""
+        with open(config_file, 'r') as f:
+            params = [line.strip() for line in f]
+            if not params:
+                sys.exit(1)
+                
+        self.transmission_rate = float(params[0]) / 100
+        self.mortality_rate = float(params[1]) / 1000
+        self.infected_duration = int(params[2])
+        self.immunity_duration = int(params[3])
+        self.population_size = int(params[4])
+        self.minimal_distance = int(params[5])
+        self.initial_infected = int(params[6])
+        self.masked_population = int(params[7])
+        self.exposed_duration = int(params[8])
+        self.dot_shape = params[9]
+        self.simulation_speed = float(params[10])
+        
+        self.collision_enabled = bool(int(params[11]))
+        self.dots_same_speed = bool(int(params[12]))
+        self.infected_wear_mask = bool(int(params[13]))
+        self.infected_slowdown = bool(int(params[14]))
+        self.people_travel_slower = bool(int(params[15]))
+        self.auto_stop = bool(int(params[16]))
+        self.visual = bool(int(params[17]))
+        
+        self.time_step = self.simulation_speed / 100
+        self.transmission_rate_masked = self.transmission_rate / 3
+        self.transmission_rate_masked_emit = self.transmission_rate / 18
+        self.mortality_rate_per_tick = self.mortality_rate
+        self.collision_distance = 1.3 if self.dot_shape == 'o' else 0.65
+        self.masked_shape = 'P'
+        
+        self.grid_size = 100
+        self.border_min = 1
+        self.border_max = self.grid_size - 1
+        self.infection_delay = 0.4
+        self.dots_spawn_spacing = 2
 
 
-# --------------------  GLOBAL VARIABLES --------------------
-
-
-HEIGHT_WIDTH = 100  # Window height and width (yes, window shape must be a square)
-BORDER_MIN = 1  # minimum distance from the border
-BORDER_MAX = HEIGHT_WIDTH - 1  # maximum distance from the border
-
-time = 0  # Time to initialize
-dots_spawn_spacing_constant = 2  # Spacing between dots when they spawn
-
-time_before_being_able_to_infect = 0.4  # Let's pretend that you can only infect people after this period of time (after having been infected) (in days)
-
-
-# --------------------  GLOBAL PARAMETERS (RETRIVED FROM FILE) --------------------
-
-logs = []
-
-file = sys.argv[1]
-parameters = []
-
-with open(file, "r") as f:
-    lines = f.readlines()
-
-    # In case the config file is empty
-    if not lines:
-        sys.exit(1)
-
-    for line in lines:
-        line = line.replace("\n", "")
-        parameters.append(line)
-
-simulation_speed = float(parameters[10])
-time_step = simulation_speed / 100  # Time step for the simulation
-sim_values_over_time = []
-
-transmission_rate = int(parameters[0]) / 100  # Chance of a dot to be infected
-
-infected_duration = int(
-    parameters[2]
-)  # Time to cure a dot (during this time, dot is infected)
-immunity_duration = int(parameters[3])  # Time before being contagious again
-number_of_dots = int(parameters[4])  # number of dots to generate
-minimal_distance = int(
-    parameters[5]
-)  # Minimal distance at initialization and for contamination
-initial_infected_population = int(parameters[6])
-masked_population = int(parameters[7])
-exposed_duration = int(parameters[8])
-shape = parameters[9]  # tip: use '.' instead if you put a value < 3 in minimal_distance
-maskedShape = "P"
-
-# For masked population
-transmission_rate_masked = transmission_rate * (
-    1 / 3
-)  # Chance of a masked dot to be infected
-
-transmission_rate_masked_emit = transmission_rate * (
-    1 / 18
-)  # Chance of a masked dot to infect a susceptible dot
-
-mortality_rate = (
-    int(parameters[1]) / 1000 / infected_duration
-)  # Chance of a dot to die per tick
-
-collision_enabled = bool(int(parameters[11]))
-dots_same_speed = bool(int(parameters[12]))
-infected_wear_mask = bool(int(parameters[13]))
-infected_slowdown = bool(int(parameters[14]))
-people_travel_slower = bool(int(parameters[15]))
-
-auto_stop = bool(int(parameters[16]))
-visual = bool(int(parameters[17]))
-
-collision_distance = 1.3 if shape == "o" else 0.65
-
-
-# -------------------- CLASSES & METHODS --------------------
-
-
-class Movement:
-    """Class that represents the movement of a dot"""
-
-    def __init__(self) -> None:
-        """Constructor for the Movement class"""
-        self.chance_to_change_direction = uniform(0.85, 1)
-        self.angle = uniform(0, 50)
-
-        reduction_factor = 100 if not people_travel_slower else simulation_speed
-
-        self.initial_speed = (
-            np.random.normal(
-                loc=simulation_speed / reduction_factor, scale=200 / reduction_factor
+class Population:
+    """Manages the entire population of dots in the simulation."""
+    
+    def __init__(self, config: SimulationConfig):
+        self.config = config
+        self.time = 0
+        self.values_over_time = []
+        
+        self.positions = self._initialize_positions()
+        self.velocities = self._initialize_velocities()
+        self.speeds = self._initialize_speeds()
+        self.states = np.zeros(config.population_size, dtype=np.int8)
+        self.masks = np.zeros(config.population_size, dtype=bool)
+        self.infection_times = np.full(config.population_size, -1.0)
+        self.recovery_times = np.full(config.population_size, -1.0)
+        
+        self._set_initial_infected()
+        self._set_masked_population()
+        
+        self.direction_change_chances = np.random.uniform(0.85, 1, config.population_size)
+        self.angles = np.random.uniform(0, 50, config.population_size)
+        
+    def _initialize_positions(self) -> np.ndarray:
+        """Initialize random positions for all dots ensuring minimum spacing."""
+        positions = np.zeros((self.config.population_size, 2))
+        for i in range(self.config.population_size):
+            while True:
+                pos = np.random.uniform(
+                    self.config.border_min,
+                    self.config.border_max,
+                    2
+                )
+                if i == 0 or np.all(
+                    np.linalg.norm(positions[:i] - pos, axis=1) 
+                    >= self.config.dots_spawn_spacing
+                ):
+                    positions[i] = pos
+                    break
+        return positions
+    
+    def _initialize_velocities(self) -> np.ndarray:
+        """Initialize random velocities for all dots."""
+        return (np.random.random((self.config.population_size, 2)) - 0.5) / 5
+    
+    def _initialize_speeds(self) -> np.ndarray:
+        """Initialize movement speeds for all dots."""
+        reduction = self.config.simulation_speed * 100 if self.config.people_travel_slower else 100
+        
+        if self.config.dots_same_speed:
+            return np.full(
+                self.config.population_size,
+                self.config.simulation_speed / reduction
             )
-            if not dots_same_speed
-            else simulation_speed / reduction_factor
-        )  # Making speedy dots rarer
-        self.speed = self.initial_speed
-
-    def speed_back_to_normal(self) -> None:
-        """Method that resets the speed back to its original value"""
-        self.speed = self.initial_speed
-
-
-class Dot:
-    def __init__(self, x: int, y: int) -> None:
-        """Constructor for the Dot class
-
-        Args:
-            x (int): abscissa of the dot
-            y (int): ordinate of the dot
-        """
-        self.id = 0  # Used to optimize collisions
-        self.x = x
-        self.y = y
-        self.velx = (random() - 0.5) / 5
-        self.vely = (random() - 0.5) / 5
-        self.is_infected = False
-        self.infected_at = -1
-        self.is_recovering = False
-        self.recovered_at = -1
-        self.wears_mask = False
-        self.was_originally_wearing_mask = False
-        self.movement = (
-            Movement()
-        )  # Default Movements values (change in Movement class to adjust their movements)
-
-    @staticmethod
-    def init_checker(x: float, y: float, already_used_coords: list) -> bool:
-        """Checks if the dot is in a distance of the dots_spawn_spacing_constant from another dot
-
-        Args:
-            x (float): abscissa of the first dot
-            y (float): ordinate of the first dot
-            already_used_coords (list): list of already occupied coordinates (by initialized dots)
-
-        Returns:
-            boolean: Whether the Dot should be initialized or not
-        """
-        for coord in already_used_coords:
-            a = Dot(x, y)
-            if a.get_distance(coord[0], coord[1]) < dots_spawn_spacing_constant:
-                return False
-        return True
-
-    def get_distance(self, x: float, y: float) -> float:
-        """Gets the distance between a dot and coordinates objects
-
-        Args:
-            x (float): abscissa of the distant dot
-            y (float): ordinate of the distant dot
-
-        Returns:
-            float: distance between the two dots
-        """
-        return math.hypot(
-            x - self.x, y - self.y
-        )  # Another way but more laggy: math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
-
-    @staticmethod
-    def initalize_multiple_dots() -> list:
-        """Generates a list of Dots
-
-        Returns:
-            list: initialized dots
-        """
-        dots = []
-        already_used_coords = []
-
-        while len(dots) != number_of_dots:
-            randx = randint(BORDER_MIN, BORDER_MAX)
-            randy = randint(BORDER_MIN, BORDER_MAX)
-            # So the dots keep distances between each other
-            if Dot.init_checker(randx, randy, already_used_coords):
-                dot = Dot(randx, randy)
-                already_used_coords.append((randx, randy))
-            else:
-                continue
-            dots.append(dot)
-
-        return dots
-
-    @staticmethod
-    def get_all_susceptible() -> list:
-        """Gets all the susceptible dots
-
-        Returns:
-            list: list of susceptible dots
-        """
-        return [dot for dot in dots if not dot.is_infected and not dot.is_recovering]
-
-    @staticmethod
-    def get_all_exposed() -> list:
-        """Gets all the exposed dots
-
-        Returns:
-            list: list of exposed dots
-        """
-        return [dot for dot in dots if dot.is_only_exposed()]
-
-    @staticmethod
-    def get_all_infected() -> list:
-        """Gets all the infected dots
-
-        Returns:
-            list: list of infected dots
-        """
-        return [dot for dot in dots if dot.is_infected and not dot.is_only_exposed()]
-
-    @staticmethod
-    def get_all_exposed_and_infected():
-        """Gets all exposed and infected dots
-
-        Returns:
-            list: list of exposed and infected dots
-        """
-        return [dot for dot in dots if dot.is_infected]
-    @staticmethod
-    def get_all_recovered() -> list:
-        """Gets all the recovered dots
-
-        Returns:
-            list: list of recovered dots
-        """
-        return [dot for dot in dots if dot.is_recovering]
-
-    def is_only_exposed(self) -> None:
-        """Returns true if the dot is asymptomatic, else return false"""
-        return self.is_infected and self.infected_at + exposed_duration > time
-
-    def try_infect(self) -> None:
-        """Tries to infect a dot (if it's "eligible")"""
-        near_infected_dots_list = [
-            dot
-            for dot in dots
-            if dot.is_infected
-            and self.get_distance(dot.x, dot.y) < minimal_distance
-            and self.infected_at + time_before_being_able_to_infect < time
-        ]
-
-        # See this french schema: https://i.imgur.com/eUfUeC0.png and https://media.discordapp.net/attachments/462181688257282058/923173582090162206/20211222_122201.jpg
-        for dot in near_infected_dots_list:
-            if (dot.wears_mask and random() < transmission_rate_masked_emit) or (
-                not dot.wears_mask and random() < transmission_rate
-            ):
-                self.become_infected()
-                break
-
-    def handle_collisions(self) -> None:
-        """Handles collisions between dots"""
-        # To avoid checking already checked dots, I check every iteration the id of the dot
-        i = self.id
-        while i < len(dots):
-            dot = dots[i]
-            if (
-                self.id != dot.id
-                and self.get_distance(dot.x, dot.y) < collision_distance
-            ):
-                # Whenever a dot makes contact with another dot, both will bounce back (their direction will be inverted)
-                self.velx *= -1
-                self.vely *= -1
-                dot.velx *= -1
-                dot.vely *= -1
-                break
-            i += 1
-
-    def move(self) -> None:
-        """Moves the dot and makes sure they don't go out of the area or touch each other.
-        Their movements are determined by their Movement class attribute and a normal distribution
-        """
-        if random() >= self.movement.chance_to_change_direction:
-            alpha = math.radians(np.random.normal(loc=0, scale=self.movement.angle))
-            theta = math.atan2(self.vely, self.velx)
-            norm = math.sqrt(self.velx ** 2 + self.vely ** 2)
-
-            self.velx = norm * math.cos(theta + alpha)
-            self.vely = norm * math.sin(theta + alpha)
-
-        # Increment x and y by their velocities and time_step
-        self.x += self.velx * ((simulation_speed * (1 + self.movement.speed)) / 10)
-        self.y += self.vely * ((simulation_speed * (1 + self.movement.speed)) / 10)
-
-        # Dots can collide each other
-        if collision_enabled:
-            self.handle_collisions()
-
-        if self.x >= BORDER_MAX:
-            self.x = BORDER_MAX
-            self.velx *= -1
-
-        if self.x <= BORDER_MIN:
-            self.x = BORDER_MIN
-            self.velx *= -1
-
-        if self.y >= BORDER_MAX:
-            self.y = BORDER_MAX
-            self.vely *= -1
-
-        if self.y <= BORDER_MIN:
-            self.y = BORDER_MIN
-            self.vely *= -1
-
-    def become_infected(self) -> None:
-        """Infects the dot"""
-        self.is_infected = True
-        self.infected_at = time
-
-        if infected_slowdown:
-            self.movement.speed *= 0.5  # Reduce speed by 50%
-
-    def kill(self) -> None:
-        """Kills the dot"""
-        global dead_dots_list
-        dead_dots_list.append(self)
-        dots.remove(self)
-
-    def become_recovered(self) -> None:
-        """Makes the dot recovered"""
-        self.is_infected = False
-        self.is_recovering = True
-        self.recovered_at = time
-        self.movement.speed_back_to_normal()
-
-        if infected_wear_mask and not self.was_originally_wearing_mask:
-            self.wears_mask = False
-
-    def become_susceptible(self) -> None:
-        """Makes the dot susceptible"""
-        self.is_recovering = False
-        self.infected_at = -1
-        self.recovered_at = -1
-
-    def update_state(self) -> None:
-        """Updates the state of the dot"""
-
-        if (
-            infected_wear_mask
-            and not self.wears_mask
-            and not self.is_only_exposed()
-            and self.is_infected
-        ):
-            self.wears_mask = True
-
-        if (
-            not self.is_only_exposed()
-            and self.is_infected
-            and random() <= mortality_rate
-        ):
-            self.kill()
-
-        # See this french schema: https://i.imgur.com/eUfUeC0.png and https://media.discordapp.net/attachments/462181688257282058/923173582090162206/20211222_122201.jpg
-        if (not self.is_recovering and not self.is_infected) and (
-            (self.wears_mask and random() < transmission_rate_masked)
-            or not self.wears_mask
-        ):
-            self.try_infect()
-
-        if (
-            self.is_infected
-            and self.infected_at != -1
-            and self.infected_at + infected_duration < time
-        ):
-            self.become_recovered()
-
-        if (
-            self.is_recovering
-            and self.recovered_at != -1
-            and self.recovered_at + immunity_duration < time
-        ):
-            self.become_susceptible()
-
-    @staticmethod
-    def move_all(dots: list) -> None:
-        """Moves a given list of dots. Also applies everything that goes with moving (kills, infects, etc.)
-
-        Args:
-            dots (list): List of Dot objects
-        """
-        global time
-        end_of_day = math.floor(time + time_step) == math.floor(time) + 1
-
-        for dot in dots:
-            dot.move()
-
-            # When a day passed, update the state of the dots (at the end of the day, so before next day)
-            if end_of_day:
-                dot.update_state()
-
-        if end_of_day:
-            update_values()
-
-        if visual:
-            update_data()
-
-        if auto_stop:
-            should_i_stop()
-
-        time += time_step
-
-
-def should_i_stop() -> None:
-    """Check if simulation should stop (if auto_stop is enabled only)"""
-    if len(Dot.get_all_exposed_and_infected()) == 0 and time > exposed_duration:
-        stop()
-
-
-def stop() -> None:
-    """Stops the simulation"""
-    write_logs()
-    sys.exit(0)
-
-
-def show_data(
-    number_of_susceptible_dots,
-    number_of_infected_dots,
-    number_of_recovered_dots,
-    number_of_exposed_dots,
-    number_of_dead_dots,
-    time,
-) -> None:
-    """Shows the data on prompt"""
-    print(
-        f"{number_of_susceptible_dots} susceptible, {number_of_infected_dots} infected, {number_of_recovered_dots} recovered, {number_of_exposed_dots} exposed, {number_of_dead_dots} dead, {int(time)} days"
-    )
-
-
-def update_values() -> None:
-    """Updates the values of the plot counters"""
-    number_of_susceptible_dots = len(Dot.get_all_susceptible())
-    number_of_infected_dots = len(Dot.get_all_infected())
-    number_of_recovered_dots = len(Dot.get_all_recovered())
-    number_of_exposed_dots = len(Dot.get_all_exposed())
-    number_of_dead_dots = len(dead_dots_list)
-
-    if visual:
-        dots_area.set_title(
-            f"Susceptible: {number_of_susceptible_dots}"
-            + f"   |   Exposed: {number_of_exposed_dots}"
-            + f"   |   Infected: {number_of_infected_dots}"
-            + f"   |   Recovered: {number_of_recovered_dots}"
-            + f"   |   Dead: {number_of_dead_dots}"
-            + f"   |   Days: {round(time)}"
+        return np.random.normal(
+            loc=self.config.simulation_speed / reduction,
+            scale=200 / reduction,
+            size=self.config.population_size
+        )
+    
+    def _set_initial_infected(self):
+        """Set initial infected population."""
+        infected_indices = np.random.choice(
+            self.config.population_size,
+            self.config.initial_infected,
+            replace=False
+        )
+        self.states[infected_indices] = 2
+        self.infection_times[infected_indices] = self.time
+        
+        if self.config.infected_slowdown:
+            self.speeds[infected_indices] *= 0.25
+            
+        if self.config.infected_wear_mask:
+            self.masks[infected_indices] = True
+    
+    def _set_masked_population(self):
+        """Set initial masked population."""
+        available_indices = np.where(~self.masks)[0]
+        mask_indices = np.random.choice(
+            available_indices,
+            min(self.config.masked_population, len(available_indices)),
+            replace=False
+        )
+        self.masks[mask_indices] = True
+
+    def update(self):
+        """Update the entire population for one time step."""
+        self._move()
+        
+        if np.floor(self.time + self.config.time_step) == np.floor(self.time) + 1:
+            self._update_states()
+            self._record_statistics()
+            
+        self.time += self.config.time_step
+        
+        return self.should_stop()
+    
+    def _move(self):
+        """Update positions of all dots."""
+        alive_mask = self.states != 4
+        
+        mask = (np.random.random(self.config.population_size) >= self.direction_change_chances) & alive_mask
+        if np.any(mask):
+            alpha = np.radians(np.random.normal(0, self.angles[mask]))
+            theta = np.arctan2(self.velocities[mask, 1], self.velocities[mask, 0])
+            norm = np.linalg.norm(self.velocities[mask], axis=1)
+            
+            self.velocities[mask, 0] = norm * np.cos(theta + alpha)
+            self.velocities[mask, 1] = norm * np.sin(theta + alpha)
+        
+        movement = np.zeros_like(self.velocities)
+        movement[alive_mask] = self.velocities[alive_mask] * ((self.config.simulation_speed * (1 + self.speeds[alive_mask, np.newaxis])) / 10)
+        self.positions += movement
+        
+        velocities_norm = np.linalg.norm(self.velocities[alive_mask], axis=1)
+        min_speed = 0.005
+        max_speed = 0.2
+        
+        mask_slow = velocities_norm < min_speed
+        if np.any(mask_slow):
+            scale = min_speed / velocities_norm[mask_slow]
+            self.velocities[alive_mask][mask_slow] *= scale[:, np.newaxis]
+        
+        mask_fast = velocities_norm > max_speed
+        if np.any(mask_fast):
+            scale = max_speed / velocities_norm[mask_fast]
+            self.velocities[alive_mask][mask_fast] *= scale[:, np.newaxis]
+        
+        if self.config.collision_enabled:
+            self._handle_collisions(alive_mask)
+        
+        self._handle_boundaries(alive_mask)
+    
+    def _handle_collisions(self, alive_mask):
+        """Handle collisions between dots."""
+        positions_alive = self.positions[alive_mask]
+        if len(positions_alive) <= 1:
+            return
+            
+        distances = np.linalg.norm(
+            positions_alive[:, np.newaxis] - positions_alive, 
+            axis=2
+        )
+        np.fill_diagonal(distances, np.inf)
+        
+        collisions = distances < self.config.collision_distance
+        if np.any(collisions):
+            i, j = np.nonzero(collisions)
+            unique_collisions = i < j
+            i, j = i[unique_collisions], j[unique_collisions]
+            
+            alive_indices = np.where(alive_mask)[0]
+            i = alive_indices[i]
+            j = alive_indices[j]
+            
+            self.velocities[i] *= -1
+            self.velocities[j] *= -1
+
+    def _handle_boundaries(self, alive_mask):
+        """Handle boundary conditions."""
+        damping = 0.8
+        
+        x_max_mask = (self.positions[:, 0] >= self.config.border_max) & alive_mask
+        x_min_mask = (self.positions[:, 0] <= self.config.border_min) & alive_mask
+        
+        self.positions[x_max_mask, 0] = self.config.border_max
+        self.positions[x_min_mask, 0] = self.config.border_min
+        self.velocities[x_max_mask | x_min_mask, 0] *= -damping
+        
+        y_max_mask = (self.positions[:, 1] >= self.config.border_max) & alive_mask
+        y_min_mask = (self.positions[:, 1] <= self.config.border_min) & alive_mask
+        
+        self.positions[y_max_mask, 1] = self.config.border_max
+        self.positions[y_min_mask, 1] = self.config.border_min
+        self.velocities[y_max_mask | y_min_mask, 1] *= -damping
+    
+    def _normalize_velocities(self):
+        """Ensure velocities stay within reasonable bounds."""
+        velocities_norm = np.linalg.norm(self.velocities, axis=1)
+        min_speed = 0.005
+        max_speed = 0.2
+        
+        mask_slow = velocities_norm < min_speed
+        if np.any(mask_slow):
+            scale = min_speed / velocities_norm[mask_slow]
+            self.velocities[mask_slow] *= scale[:, np.newaxis]
+        
+        mask_fast = velocities_norm > max_speed
+        if np.any(mask_fast):
+            scale = max_speed / velocities_norm[mask_fast]
+            self.velocities[mask_fast] *= scale[:, np.newaxis]
+    
+    def _update_states(self):
+        """Update health states of all dots."""
+        self._handle_deaths()
+        self._handle_infections()
+        self._handle_recoveries()
+        self._handle_immunity_loss()
+    
+    def _handle_deaths(self):
+        """Handle deaths of infected individuals."""
+        infected_mask = self.states == 2
+        death_candidates = np.random.random(self.config.population_size) <= self.config.mortality_rate_per_tick
+        new_deaths = infected_mask & death_candidates
+        self.states[new_deaths] = 4
+    
+    def _handle_infections(self):
+        """Handle new infections."""
+        susceptible_mask = self.states == 0
+        if not np.any(susceptible_mask):
+            return
+            
+        infected_mask = self.states == 2
+        if not np.any(infected_mask):
+            return
+            
+        distances = np.linalg.norm(
+            self.positions[susceptible_mask][:, np.newaxis] - self.positions[infected_mask],
+            axis=2
         )
         
-    else:
-        show_data(
-            number_of_susceptible_dots,
-            number_of_infected_dots,
-            number_of_recovered_dots,
-            number_of_exposed_dots,
-            number_of_dead_dots,
-            time,
-        )
-
-    sim_values_over_time.append(
-        [
-            number_of_susceptible_dots,
-            number_of_infected_dots,
-            number_of_recovered_dots,
-            number_of_exposed_dots,
-            number_of_dead_dots,
-            time,
+        possible_infections = distances < self.config.minimal_distance
+        
+        for i, susceptible_idx in enumerate(np.where(susceptible_mask)[0]):
+            if not np.any(possible_infections[i]):
+                continue
+                
+            infected_indices = np.where(infected_mask)[0][possible_infections[i]]
+            
+            for infected_idx in infected_indices:
+                base_rate = (self.config.transmission_rate_masked_emit 
+                           if self.masks[infected_idx] 
+                           else self.config.transmission_rate)
+                
+                if self.masks[susceptible_idx]:
+                    base_rate *= (self.config.transmission_rate_masked / 
+                                self.config.transmission_rate)
+                
+                if np.random.random() < base_rate:
+                    self.states[susceptible_idx] = 1
+                    self.infection_times[susceptible_idx] = self.time
+                    break
+    
+    def _handle_recoveries(self):
+        """Handle recovery of infected individuals."""
+        infected_time = self.time - self.infection_times
+        exposed_mask = (self.states == 1) & (infected_time >= self.config.exposed_duration)
+        infected_mask = (self.states == 2) & (infected_time >= self.config.infected_duration)
+        
+        if np.any(exposed_mask):
+            self.states[exposed_mask] = 2
+            if self.config.infected_wear_mask:
+                self.masks[exposed_mask] = True
+            if self.config.infected_slowdown:
+                self.speeds[exposed_mask] *= 0.25
+        
+        recovery_mask = infected_mask & (self.states != 4)
+        if np.any(recovery_mask):
+            self.states[recovery_mask] = 3
+            self.recovery_times[recovery_mask] = self.time
+            
+            if self.config.infected_wear_mask:
+                self.masks[recovery_mask] = False
+                
+            if self.config.infected_slowdown:
+                self.speeds[recovery_mask] *= 4
+    
+    def _handle_immunity_loss(self):
+        """Handle loss of immunity for recovered individuals."""
+        recovered_mask = self.states == 3
+        immunity_time = self.time - self.recovery_times
+        immunity_loss = recovered_mask & (immunity_time >= self.config.immunity_duration)
+        
+        self.states[immunity_loss] = 0
+        self.infection_times[immunity_loss] = -1
+        self.recovery_times[immunity_loss] = -1
+    
+    def _record_statistics(self):
+        """Record current population statistics."""
+        stats = [
+            np.sum(self.states == 0),
+            np.sum(self.states == 2),
+            np.sum(self.states == 3),
+            np.sum(self.states == 1),
+            np.sum(self.states == 4),
+            self.time
         ]
-    )
+        self.values_over_time.append(stats)
+        
+    def should_stop(self) -> bool:
+        """Determine if simulation should stop."""
+        if not self.config.auto_stop:
+            return False
+        
+        return (np.sum(self.states == 1) + np.sum(self.states == 2) == 0 
+                and self.time > self.config.exposed_duration)
+    
+    def get_plot_data(self):
+        """Get current positions for plotting."""
+        return {
+            'susceptible': {
+                'unmasked': self.positions[(self.states == 0) & ~self.masks],
+                'masked': self.positions[(self.states == 0) & self.masks]
+            },
+            'exposed': {
+                'unmasked': self.positions[(self.states == 1) & ~self.masks],
+                'masked': self.positions[(self.states == 1) & self.masks]
+            },
+            'infected': {
+                'unmasked': self.positions[(self.states == 2) & ~self.masks],
+                'masked': self.positions[(self.states == 2) & self.masks]
+            },
+            'recovered': {
+                'unmasked': self.positions[(self.states == 3) & ~self.masks],
+                'masked': self.positions[(self.states == 3) & self.masks]
+            },
+            'dead': {
+                'unmasked': self.positions[(self.states == 4) & ~self.masks],
+                'masked': self.positions[(self.states == 4) & self.masks]
+            }
+        }
 
-
-def update_data() -> None:
-    """Updates the data of the plot"""
-    global susceptible_dots, infected_dots, recovered_dots, time, dead_dots, dots_area, susceptible_dots, infected_dots, recovered_dots, dead_dots_masked, exposed_dots, exposed_dots_masked
-
-    susceptible_dots.set_data(
-        [dot.x for dot in Dot.get_all_susceptible() if not dot.wears_mask],
-        [dot.y for dot in Dot.get_all_susceptible() if not dot.wears_mask],
-    )
-
-    exposed_dots.set_data(
-        [dot.x for dot in Dot.get_all_exposed() if not dot.wears_mask],
-        [dot.y for dot in Dot.get_all_exposed() if not dot.wears_mask],
-    )
-
-    infected_dots.set_data(
-        [
-            dot.x
-            for dot in Dot.get_all_infected()
-            if not dot.wears_mask and not infected_wear_mask
-        ],
-        [
-            dot.y
-            for dot in Dot.get_all_infected()
-            if not dot.wears_mask and not infected_wear_mask
-        ],
-    )
-
-    recovered_dots.set_data(
-        [dot.x for dot in Dot.get_all_recovered() if not dot.wears_mask],
-        [dot.y for dot in Dot.get_all_recovered() if not dot.wears_mask],
-    )
-
-    dead_dots.set_data(
-        [dot.x for dot in dead_dots_list if not dot.wears_mask],
-        [dot.y for dot in dead_dots_list if not dot.wears_mask],
-    )
-
-    # For masked dots
-
-    susceptible_dots_masked.set_data(
-        [dot.x for dot in Dot.get_all_susceptible() if dot.wears_mask],
-        [dot.y for dot in Dot.get_all_susceptible() if dot.wears_mask],
-    )
-
-    exposed_dots_masked.set_data(
-        [dot.x for dot in Dot.get_all_exposed() if dot.wears_mask],
-        [dot.y for dot in Dot.get_all_exposed() if dot.wears_mask],
-    )
-
-    infected_dots_masked.set_data(
-        [
-            dot.x
-            for dot in Dot.get_all_infected()
-            if dot.wears_mask or infected_wear_mask
-        ],
-        [
-            dot.y
-            for dot in Dot.get_all_infected()
-            if dot.wears_mask or infected_wear_mask
-        ],
-    )
-
-    recovered_dots_masked.set_data(
-        [dot.x for dot in Dot.get_all_recovered() if dot.wears_mask],
-        [dot.y for dot in Dot.get_all_recovered() if dot.wears_mask],
-    )
-
-    dead_dots_masked.set_data(
-        [dot.x for dot in dead_dots_list if dot.wears_mask],
-        [dot.y for dot in dead_dots_list if dot.wears_mask],
-    )
-
-
-def write_logs() -> None:
-    """Write simulation logs to text file."""
-    with open("files\\logs.txt", "a") as f:
-        for values in sim_values_over_time:
-            f.write(
-                f"{values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]}\n"
-            )
-
-
-def generate_not_taken_index(index_list: list) -> int:
-    """Generates a random index that has not been taken yet.
-
-    Args:
-        index_list (list): List of taken indices
-
-    Raises:
-        IndexError: If all indices have been taken
-
-    Returns:
-        int: Index that has not been taken yet
-    """
-    if len(dots) == len(index_list):
-        raise IndexError("All indices have been taken")
-
-    while True:
-        index = randint(0, len(dots) - 1)
-        if index not in index_list:
-            return index
-
-
-# -------------------- MAIN FUNCTION --------------------
-
-
-def main() -> None:
-    """Main function"""
-    global dots, dead_dot, graph, dots_area, dead_dots_list
-
-    # Dots initialization
-    dots = Dot.initalize_multiple_dots()
-
-    # Giving IDs to Dots
-    for dot in dots:
-        dot.id = dots.index(dot)
-
-    already_used_indexes = []
-    for _ in range(initial_infected_population):
-
-        rdm = generate_not_taken_index(already_used_indexes)
-
-        dots[rdm].become_infected()
-
-        if infected_wear_mask and not dots[rdm].is_only_exposed():
-            dots[rdm].wears_mask = True
-
-        already_used_indexes.append(rdm)
-
-    already_used_indexes = []
-    for _ in range(masked_population):
-
-        rdm = generate_not_taken_index(already_used_indexes)
-
-        dots[rdm].wears_mask = True
-        dots[rdm].was_originally_wearing_mask = True
-        already_used_indexes.append(rdm)
-
-    dead_dots_list = []
-
-    if visual:
-        # Graph initialization
-        figure_dots = plt.figure(facecolor="white", figsize=(8.5, 6))
-        dots_area = plt.axes(xlim=(0, HEIGHT_WIDTH), ylim=(0, HEIGHT_WIDTH))
-
-        # Differentiating dots between each others
-        global susceptible_dots
-        susceptible_dots = dots_area.plot(
-            [dot.x for dot in dots if not dot.is_infected and not dot.wears_mask],
-            [dot.y for dot in dots if not dot.is_infected and not dot.wears_mask],
-            f"g{shape}",
-        )[0]
-
-        global exposed_dots
-        exposed_dots = dots_area.plot(
-            [dot.x for dot in Dot.get_all_exposed() if not dot.wears_mask],
-            [dot.y for dot in Dot.get_all_exposed() if not dot.wears_mask],
-            f"m{shape}",
-        )[0]
-
-        global infected_dots
-        infected_dots = dots_area.plot(
-            [
-                dot.x
-                for dot in Dot.get_all_infected()
-                if not dot.wears_mask and not infected_wear_mask
-            ],
-            [
-                dot.y
-                for dot in Dot.get_all_infected()
-                if not dot.wears_mask and not infected_wear_mask
-            ],
-            f"r{shape}",
-        )[0]
-
-        global recovered_dots
-        recovered_dots = dots_area.plot(
-            [dot.x for dot in Dot.get_all_recovered() if not dot.wears_mask],
-            [dot.y for dot in Dot.get_all_recovered() if not dot.wears_mask],
-            f"b{shape}",
-        )[0]
-
-        global dead_dots
-        dead_dots = dots_area.plot(
-            [dot.x for dot in dead_dots_list if not dot.wears_mask],
-            [dot.y for dot in dead_dots_list if not dot.wears_mask],
-            f"k{shape}",
-        )[0]
-
-        # For masked population
-
-        global susceptible_dots_masked
-        susceptible_dots_masked = dots_area.plot(
-            [dot.x for dot in Dot.get_all_susceptible() if dot.wears_mask],
-            [dot.y for dot in Dot.get_all_susceptible() if dot.wears_mask],
-            f"g{maskedShape}",
-        )[0]
-
-        global exposed_dots_masked
-        exposed_dots_masked = dots_area.plot(
-            [dot.x for dot in Dot.get_all_exposed() if dot.wears_mask],
-            [dot.y for dot in Dot.get_all_exposed() if dot.wears_mask],
-            f"m{maskedShape}",
-        )[0]
-
-        global infected_dots_masked
-        infected_dots_masked = dots_area.plot(
-            [
-                dot.x
-                for dot in Dot.get_all_infected()
-                if dot.wears_mask or infected_wear_mask
-            ],
-            [
-                dot.y
-                for dot in Dot.get_all_infected()
-                if dot.wears_mask or infected_wear_mask
-            ],
-            f"r{maskedShape}",
-        )[0]
-
-        global recovered_dots_masked
-        recovered_dots_masked = dots_area.plot(
-            [dot.x for dot in Dot.get_all_recovered() if dot.wears_mask],
-            [dot.y for dot in Dot.get_all_recovered() if dot.wears_mask],
-            f"b{maskedShape}",
-        )[0]
-
-        global dead_dots_masked
-        dead_dots_masked = dots_area.plot(
-            [dot.x for dot in dead_dots_list if dot.wears_mask],
-            [dot.y for dot in dead_dots_list if dot.wears_mask],
-            f"k{maskedShape}",
-        )[0]
-
-        # We need to keep this in an unused variable, otherwise the function won't work
-        _ = anim.FuncAnimation(
-            figure_dots, lambda z: Dot.move_all(dots), frames=60, interval=0
+class Visualizer:
+    """Handles visualization of the simulation."""
+    
+    def __init__(self, population: Population, config: SimulationConfig):
+        self.population = population
+        self.config = config
+        
+        self.fig = plt.figure(facecolor="white", figsize=(8.5, 6))
+        self.ax = plt.axes(xlim=(0, config.grid_size), ylim=(0, config.grid_size))
+        self.ax.axis('off')
+        
+        self.plots = {}
+        for state in ['susceptible', 'exposed', 'infected', 'recovered', 'dead']:
+            self.plots[state] = {
+                'unmasked': self.ax.plot([], [], f"{self._get_color(state)}{config.dot_shape}")[0],
+                'masked': self.ax.plot([], [], f"{self._get_color(state)}{config.masked_shape}")[0]
+            }
+        
+        ax_stop = self.fig.add_axes([0.88, 0.02, 0.1, 0.075])
+        self.stop_button = Button(ax_stop, 'Stop')
+        self.stop_button.on_clicked(self._handle_stop)
+        
+    @staticmethod
+    def _get_color(state: str) -> str:
+        """Get color code for each state."""
+        colors = {
+            'susceptible': 'g',
+            'exposed': 'm',
+            'infected': 'r',
+            'recovered': 'b',
+            'dead': 'k'
+        }
+        return colors[state]
+    
+    def update(self, frame):
+        """Update visualization for current frame."""
+        plot_data = self.population.get_plot_data()
+        
+        for state, data in plot_data.items():
+            for mask_state in ['unmasked', 'masked']:
+                positions = data[mask_state]
+                if len(positions) > 0:
+                    self.plots[state][mask_state].set_data(positions[:, 0], positions[:, 1])
+                else:
+                    self.plots[state][mask_state].set_data([], [])
+        
+        stats = self.population.values_over_time[-1] if self.population.values_over_time else [0, 0, 0, 0, 0, 0]
+        self.ax.set_title(
+            f"Susceptible: {stats[0]}   |   "
+            f"Exposed: {stats[3]}   |   "
+            f"Infected: {stats[1]}   |   "
+            f"Recovered: {stats[2]}   |   "
+            f"Dead: {stats[4]}   |   "
+            f"Days: {int(stats[5])}"
         )
-        dots_area.axis("off")
-
-        # Button to stop the simulation
-        axstop = figure_dots.add_axes([0.88, 0.02, 0.1, 0.075])
-        b_stop = Button(axstop, "Stop")
-
-        # Positioning the button at bottom right corner
-        b_stop.on_clicked(lambda _: stop())
-
-        # Showing the plot
+    
+    def _handle_stop(self, event):
+        """Handle stop button click."""
+        self._write_logs()
+        plt.close()
+        sys.exit(0)
+    
+    def _write_logs(self):
+        """Write simulation logs to file."""
+        with open("files\\logs.txt", "a") as f:
+            for values in self.population.values_over_time:
+                f.write(f"{values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]}\n")
+    
+    def show(self):
+        """Start the visualization."""
+        def update_frame(frame):
+            if self.population.update():
+                self._write_logs()
+                plt.close()
+                sys.exit(0)
+            self.update(frame)
+            
+        anim = FuncAnimation(
+            self.fig,
+            update_frame,
+            frames=60,
+            interval=0
+        )
         plt.show()
 
+def main():
+    """Main simulation function."""
+    config = SimulationConfig(sys.argv[1])
+    population = Population(config)
+    
+    if config.visual:
+        visualizer = Visualizer(population, config)
+        visualizer.show()
     else:
         while True:
-            Dot.move_all(dots)
-
-
-# -------------------- MAIN CALL --------------------
-
+            if population.update():
+                population._write_logs()
+                break
 
 if __name__ == "__main__":
     main()

@@ -94,7 +94,7 @@ class Ui_MainWindow(object):
         self.minimal_distance_slider.setGeometry(QtCore.QRect(300, 210, 160, 22))
         self.minimal_distance_slider.setMaximum(15)
         self.minimal_distance_slider.setSingleStep(1)
-        self.minimal_distance_slider.setProperty("value", 2)
+        self.minimal_distance_slider.setProperty("value", 3)
         self.minimal_distance_slider.setOrientation(QtCore.Qt.Horizontal)
         self.minimal_distance_slider.setObjectName("minimal_distance_slider")
         self.minimal_distance_slider.setToolTip(
