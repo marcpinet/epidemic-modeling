@@ -17,13 +17,13 @@ class SimulationConfig:
                 
         self.transmission_rate = float(params[0]) / 100
         self.mortality_rate = float(params[1]) / 1000
-        self.infected_duration = int(params[2])
+        self.infected_duration = int(params[2])      # days in infectious state (after incubation)
         self.immunity_duration = int(params[3])
         self.population_size = int(params[4])
         self.minimal_distance = int(params[5])
         self.initial_infected = int(params[6])
         self.masked_population = int(params[7])
-        self.exposed_duration = int(params[8])
+        self.exposed_duration = int(params[8])         # incubation time (non‐infectious)
         self.dot_shape = params[9]
         self.simulation_speed = float(params[10])
         
@@ -35,6 +35,7 @@ class SimulationConfig:
         self.auto_stop = bool(int(params[16]))
         self.visual = bool(int(params[17]))
         
+        # time_step is in days; when simulation_speed is lower than 100, the simulation updates several ticks per day
         self.time_step = self.simulation_speed / 100
         self.transmission_rate_masked = self.transmission_rate / 3
         self.transmission_rate_masked_emit = self.transmission_rate / 18
@@ -48,7 +49,6 @@ class SimulationConfig:
         self.infection_delay = 0.4
         self.dots_spawn_spacing = 2
 
-
 class Population:
     """Manages the entire population of dots in the simulation."""
     
@@ -60,13 +60,15 @@ class Population:
         self.positions = self._initialize_positions()
         self.velocities = self._initialize_velocities()
         self.speeds = self._initialize_speeds()
-        self.states = np.zeros(config.population_size, dtype=np.int8)
+        self.states = np.zeros(config.population_size, dtype=np.int8)  # 0: susceptible, 1: exposed, 2: infected, 3: recovered, 4: dead
         self.masks = np.zeros(config.population_size, dtype=bool)
         self.infection_times = np.full(config.population_size, -1.0)
         self.recovery_times = np.full(config.population_size, -1.0)
         
-        self._set_initial_infected()
+        self._set_initial_infected()   # now sets them as "exposed"
         self._set_masked_population()
+        # Save the original mask configuration so that recovered individuals revert to it
+        self.initial_masks = self.masks.copy()
         
         self.direction_change_chances = np.random.uniform(0.85, 1, config.population_size)
         self.angles = np.random.uniform(0, 50, config.population_size)
@@ -109,20 +111,16 @@ class Population:
         )
     
     def _set_initial_infected(self):
-        """Set initial infected population."""
+        """Set initial infected population (starting as exposed)."""
         infected_indices = np.random.choice(
             self.config.population_size,
             self.config.initial_infected,
             replace=False
         )
-        self.states[infected_indices] = 2
+        # Set as exposed (state 1) so that they go through incubation before becoming infectious.
+        self.states[infected_indices] = 1
         self.infection_times[infected_indices] = self.time
-        
-        if self.config.infected_slowdown:
-            self.speeds[infected_indices] *= 0.25
-            
-        if self.config.infected_wear_mask:
-            self.masks[infected_indices] = True
+        # Note: The slowdown and mask-forcing will be applied when they transition to state 2.
     
     def _set_masked_population(self):
         """Set initial masked population."""
@@ -138,9 +136,9 @@ class Population:
         """Update the entire population for one time step."""
         self._move()
         
+        # Update states only when a new day begins.
         if np.floor(self.time + self.config.time_step) == np.floor(self.time) + 1:
             self._update_states()
-            self._record_statistics()
             
         self.time += self.config.time_step
         
@@ -150,6 +148,7 @@ class Population:
         """Update positions of all dots."""
         alive_mask = self.states != 4
         
+        # Randomly change direction for some dots.
         mask = (np.random.random(self.config.population_size) >= self.direction_change_chances) & alive_mask
         if np.any(mask):
             alpha = np.radians(np.random.normal(0, self.angles[mask]))
@@ -163,19 +162,23 @@ class Population:
         movement[alive_mask] = self.velocities[alive_mask] * ((self.config.simulation_speed * (1 + self.speeds[alive_mask, np.newaxis])) / 10)
         self.positions += movement
         
-        velocities_norm = np.linalg.norm(self.velocities[alive_mask], axis=1)
+        # Normalize velocities: use proper indexing so the changes are applied in-place.
+        alive_indices = np.where(alive_mask)[0]
+        velocities_norm = np.linalg.norm(self.velocities[alive_indices], axis=1)
         min_speed = 0.005
         max_speed = 0.2
         
         mask_slow = velocities_norm < min_speed
         if np.any(mask_slow):
             scale = min_speed / velocities_norm[mask_slow]
-            self.velocities[alive_mask][mask_slow] *= scale[:, np.newaxis]
+            slow_indices = alive_indices[mask_slow]
+            self.velocities[slow_indices] *= scale[:, np.newaxis]
         
         mask_fast = velocities_norm > max_speed
         if np.any(mask_fast):
             scale = max_speed / velocities_norm[mask_fast]
-            self.velocities[alive_mask][mask_fast] *= scale[:, np.newaxis]
+            fast_indices = alive_indices[mask_fast]
+            self.velocities[fast_indices] *= scale[:, np.newaxis]
         
         if self.config.collision_enabled:
             self._handle_collisions(alive_mask)
@@ -225,38 +228,42 @@ class Population:
         self.positions[y_min_mask, 1] = self.config.border_min
         self.velocities[y_max_mask | y_min_mask, 1] *= -damping
     
-    def _normalize_velocities(self):
-        """Ensure velocities stay within reasonable bounds."""
-        velocities_norm = np.linalg.norm(self.velocities, axis=1)
-        min_speed = 0.005
-        max_speed = 0.2
-        
-        mask_slow = velocities_norm < min_speed
-        if np.any(mask_slow):
-            scale = min_speed / velocities_norm[mask_slow]
-            self.velocities[mask_slow] *= scale[:, np.newaxis]
-        
-        mask_fast = velocities_norm > max_speed
-        if np.any(mask_fast):
-            scale = max_speed / velocities_norm[mask_fast]
-            self.velocities[mask_fast] *= scale[:, np.newaxis]
-    
     def _update_states(self):
-        """Update health states of all dots."""
-        self._handle_deaths()
+        """Update health states of all dots for the new day."""
+        # 1. Transition exposed individuals to infected (and reset their infection timer)
+        self._transition_exposed()
+        # 2. Process new infections from the current infectious individuals.
         self._handle_infections()
+        # 3. Process deaths (only in the infectious state).
+        self._handle_deaths()
+        # 4. Process recoveries for those who have been infectious long enough.
         self._handle_recoveries()
+        # 5. Handle loss of immunity.
         self._handle_immunity_loss()
+        # 6. Record daily statistics.
+        self._record_statistics()
+    
+    def _transition_exposed(self):
+        """Transition exposed individuals to the infectious state after incubation ends."""
+        exposed_mask = (self.states == 1) & (self.time - self.infection_times >= self.config.exposed_duration)
+        if np.any(exposed_mask):
+            self.states[exposed_mask] = 2
+            # Reset infection time so that the infected (symptomatic) period lasts the full duration.
+            self.infection_times[exposed_mask] = self.time
+            if self.config.infected_wear_mask:
+                self.masks[exposed_mask] = True
+            if self.config.infected_slowdown:
+                self.speeds[exposed_mask] *= 0.25
     
     def _handle_deaths(self):
-        """Handle deaths of infected individuals."""
+        """Handle deaths of infectious individuals."""
         infected_mask = self.states == 2
         death_candidates = np.random.random(self.config.population_size) <= self.config.mortality_rate_per_tick
         new_deaths = infected_mask & death_candidates
         self.states[new_deaths] = 4
     
     def _handle_infections(self):
-        """Handle new infections."""
+        """Handle new infections based on contacts between susceptible and infectious dots."""
         susceptible_mask = self.states == 0
         if not np.any(susceptible_mask):
             return
@@ -288,33 +295,20 @@ class Population:
                                 self.config.transmission_rate)
                 
                 if np.random.random() < base_rate:
-                    self.states[susceptible_idx] = 1
+                    self.states[susceptible_idx] = 1  # become exposed
                     self.infection_times[susceptible_idx] = self.time
                     break
     
     def _handle_recoveries(self):
-        """Handle recovery of infected individuals."""
-        infected_time = self.time - self.infection_times
-        exposed_mask = (self.states == 1) & (infected_time >= self.config.exposed_duration)
-        infected_mask = (self.states == 2) & (infected_time >= self.config.infected_duration)
-        
-        if np.any(exposed_mask):
-            self.states[exposed_mask] = 2
-            if self.config.infected_wear_mask:
-                self.masks[exposed_mask] = True
+        """Handle recovery of infectious individuals."""
+        infected_mask = (self.states == 2) & (self.time - self.infection_times >= self.config.infected_duration)
+        if np.any(infected_mask):
+            self.states[infected_mask] = 3
+            self.recovery_times[infected_mask] = self.time
+            # Restore the original mask status (some individuals may be masked from the start)
+            self.masks[infected_mask] = self.initial_masks[infected_mask]
             if self.config.infected_slowdown:
-                self.speeds[exposed_mask] *= 0.25
-        
-        recovery_mask = infected_mask & (self.states != 4)
-        if np.any(recovery_mask):
-            self.states[recovery_mask] = 3
-            self.recovery_times[recovery_mask] = self.time
-            
-            if self.config.infected_wear_mask:
-                self.masks[recovery_mask] = False
-                
-            if self.config.infected_slowdown:
-                self.speeds[recovery_mask] *= 4
+                self.speeds[infected_mask] *= 4
     
     def _handle_immunity_loss(self):
         """Handle loss of immunity for recovered individuals."""
@@ -329,11 +323,11 @@ class Population:
     def _record_statistics(self):
         """Record current population statistics."""
         stats = [
-            np.sum(self.states == 0),
-            np.sum(self.states == 2),
-            np.sum(self.states == 3),
-            np.sum(self.states == 1),
-            np.sum(self.states == 4),
+            np.sum(self.states == 0),  # susceptible
+            np.sum(self.states == 2),  # infected (state 2)
+            np.sum(self.states == 3),  # recovered
+            np.sum(self.states == 1),  # exposed
+            np.sum(self.states == 4),  # dead
             self.time
         ]
         self.values_over_time.append(stats)
@@ -467,7 +461,10 @@ def main():
     else:
         while True:
             if population.update():
-                population._write_logs()
+                # In non‐visual mode, write logs and exit.
+                with open("files\\logs.txt", "a") as f:
+                    for values in population.values_over_time:
+                        f.write(f"{values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]}\n")
                 break
 
 if __name__ == "__main__":
